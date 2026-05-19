@@ -58,6 +58,12 @@ Before implementation, record:
 
 Use the project docs under `docs/` to keep planning visible.
 
+Before parallel module work, also align with:
+
+- `docs/11_后端架构收口与协作边界规范.md`
+- `docs/06_P0开发任务分配方案.md`
+- `docs/05_开发流程与日志规范.md`
+
 ### 3. Development Log
 
 For meaningful tasks, keep a short development log that records:
@@ -80,6 +86,14 @@ When implementing:
 - do not bypass agreed conventions
 - prefer stable, maintainable code over clever shortcuts
 - if changing shared contracts, update docs immediately
+
+For backend work, additionally enforce:
+
+- business modules stay inside their owned directories
+- cross-module calls go through `service` interfaces only
+- do not place business logic in controllers
+- do not add new persistence work without `entity / mapper / convert`
+- dashboard aggregation belongs only in `modules/dashboard/**`
 
 ### 5. Testing Is Mandatory
 
@@ -132,6 +146,7 @@ Before considering a task complete, verify:
 - own their module implementation
 - own tests for their module
 - own local self-check before asking for acceptance
+- do not edit another member's owned directory without lead approval
 
 No developer should hand off a module without tests.
 
