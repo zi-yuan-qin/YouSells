@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yousells.modules.customer.mapper.CustomerMapper">
+
+    <resultMap id="customerMap" type="com.yousells.modules.customer.entity.CustomerEntity">
+        <id property="id" column="id"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerType" column="customer_type"/>
+        <result property="nickname" column="nickname"/>
+        <result property="contactValue" column="contact_value"/>
+        <result property="sourcePlatform" column="source_platform"/>
+        <result property="addedAt" column="added_at"/>
+        <result property="isNuistFreshman" column="is_nuist_freshman"/>
+        <result property="expectedMajor" column="expected_major"/>
+        <result property="baseLevel" column="base_level"/>
+        <result property="interestDirection" column="interest_direction"/>
+        <result property="intentLevel" column="intent_level"/>
+        <result property="currentStage" column="current_stage"/>
+        <result property="currentConcern" column="current_concern"/>
+        <result property="latestFeedback" column="latest_feedback"/>
+        <result property="lastContactAt" column="last_contact_at"/>
+        <result property="nextFollowAction" column="next_follow_action"/>
+        <result property="nextFollowAt" column="next_follow_at"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="assistantUserId" column="assistant_user_id"/>
+        <result property="needsSupport" column="needs_support"/>
+        <result property="conversionResult" column="conversion_result"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+        <result property="isDeleted" column="is_deleted"/>
+    </resultMap>
+
+    <select id="pageCustomers" resultMap="customerMap">
+        SELECT c.*
+        FROM customers c
+        WHERE c.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (c.nickname LIKE CONCAT('%', #{keyword}, '%')
+                 OR c.customer_code LIKE CONCAT('%', #{keyword}, '%')
+                 OR c.contact_value LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="intentLevel != null and intentLevel != ''">
+            AND c.intent_level = #{intentLevel}
+        </if>
+        <if test="currentStage != null and currentStage != ''">
+            AND c.current_stage = #{currentStage}
+        </if>
+        <if test="sourcePlatform != null and sourcePlatform != ''">
+            AND c.source_platform = #{sourcePlatform}
+        </if>
+        <if test="ownerUserId != null">
+            AND c.owner_user_id = #{ownerUserId}
+        </if>
+        ORDER BY c.updated_at DESC
+    </select>
+
+    <select id="selectOwnerDisplayNames" resultType="com.yousells.modules.customer.mapper.CustomerMapper$OwnerDisplayName">
+        SELECT id AS userId, display_name AS displayName
+        FROM users
+        WHERE id IN
+        <foreach collection="userIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+          AND is_deleted = 0
+    </select>
+
+</mapper>

@@ -1,38 +1,105 @@
 package com.yousells.modules.followup.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.yousells.common.constant.ErrorCodeConstants;
+import com.yousells.common.exception.BusinessException;
 import com.yousells.common.response.PageResponse;
+import com.yousells.common.security.SecurityUserContext;
+import com.yousells.modules.customer.entity.CustomerEntity;
+import com.yousells.modules.customer.mapper.CustomerMapper;
+import com.yousells.modules.followup.convert.FollowUpConvert;
 import com.yousells.modules.followup.dto.FollowUpCreateRequest;
 import com.yousells.modules.followup.dto.FollowUpQueryRequest;
+import com.yousells.modules.followup.entity.FollowUpEntity;
+import com.yousells.modules.followup.mapper.FollowUpMapper;
 import com.yousells.modules.followup.service.FollowUpService;
 import com.yousells.modules.followup.vo.FollowUpVo;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class FollowUpServiceImpl implements FollowUpService {
 
-    private final List<FollowUpVo> sampleFollowUps = List.of(
-            new FollowUpVo(5001L, 1001L, "CHAT", "聊了学习路线和项目训练", "愿意继续了解", "担心时间安排", "发项目路线图", LocalDateTime.of(2026, 5, 19, 12, 0), "秦梓源", "秦梓源", LocalDateTime.of(2026, 5, 17, 21, 30)),
-            new FollowUpVo(5002L, 1001L, "GROUP", "拉进技术交流群并介绍群文件", "对群里的项目分享感兴趣", "担心基础弱", "安排一次简单体验", LocalDateTime.of(2026, 5, 20, 19, 0), "志明", "秦梓源", LocalDateTime.of(2026, 5, 18, 10, 10)),
-            new FollowUpVo(5003L, 1002L, "CHAT", "发了课程结构和增值服务", "想再看一些学长案例", "价格", "补案例截图", LocalDateTime.of(2026, 5, 20, 20, 0), "志明", "志明", LocalDateTime.of(2026, 5, 18, 20, 30))
-    );
+    private final FollowUpMapper followUpMapper;
+    private final CustomerMapper customerMapper;
+
+    public FollowUpServiceImpl(FollowUpMapper followUpMapper, CustomerMapper customerMapper) {
+        this.followUpMapper = followUpMapper;
+        this.customerMapper = customerMapper;
+    }
 
     @Override
     public PageResponse<FollowUpVo> pageFollowUps(FollowUpQueryRequest request) {
-        int page = request.page() == null || request.page() < 1 ? 1 : request.page();
+        int pageNum = request.page() == null || request.page() < 1 ? 1 : request.page();
         int pageSize = request.pageSize() == null || request.pageSize() < 1 ? 20 : request.pageSize();
-        List<FollowUpVo> filtered = sampleFollowUps.stream()
-                .filter(item -> request.customerId() == null || request.customerId().equals(item.customerId()))
+
+        Page<FollowUpEntity> page = new Page<>(pageNum, pageSize);
+        IPage<FollowUpEntity> result = followUpMapper.pageFollowUps(page, request.customerId());
+
+        List<FollowUpEntity> entities = result.getRecords();
+        if (entities.isEmpty()) {
+            return PageResponse.of(List.of(), pageNum, pageSize, result.getTotal());
+        }
+
+        Map<Long, String> displayNameMap = buildDisplayNameMap(entities);
+
+        List<FollowUpVo> list = entities.stream()
+                .map(e -> FollowUpConvert.toVo(e,
+                        displayNameMap.getOrDefault(e.getOperatorUserId(), ""),
+                        displayNameMap.getOrDefault(e.getOwnerUserId(), "")))
                 .toList();
-        int fromIndex = Math.min((page - 1) * pageSize, filtered.size());
-        int toIndex = Math.min(fromIndex + pageSize, filtered.size());
-        return PageResponse.of(filtered.subList(fromIndex, toIndex), page, pageSize, filtered.size());
+
+        return PageResponse.of(list, result.getCurrent(), result.getSize(), result.getTotal());
     }
 
     @Override
     public Long createFollowUp(FollowUpCreateRequest request) {
-        return 8001L;
+        CustomerEntity customer = customerMapper.selectById(request.customerId());
+        if (customer == null) {
+            throw new BusinessException(ErrorCodeConstants.NOT_FOUND, "customer not found");
+        }
+
+        Long operatorUserId = SecurityUserContext.requireCurrentUser().userId();
+
+        FollowUpEntity entity = FollowUpConvert.toEntity(request);
+        entity.setOperatorUserId(operatorUserId);
+        entity.setOwnerUserId(customer.getOwnerUserId());
+        followUpMapper.insert(entity);
+
+        customer.setLastContactAt(LocalDateTime.now());
+        customer.setLatestFeedback(request.communicatedContent());
+        if (request.nextAction() != null) {
+            customer.setNextFollowAction(request.nextAction());
+        }
+        if (request.nextFollowAt() != null) {
+            customer.setNextFollowAt(request.nextFollowAt());
+        }
+        if (request.currentConcern() != null) {
+            customer.setCurrentConcern(request.currentConcern());
+        }
+        customerMapper.updateById(customer);
+
+        return entity.getId();
+    }
+
+    private Map<Long, String> buildDisplayNameMap(List<FollowUpEntity> entities) {
+        Set<Long> userIds = entities.stream()
+                .flatMap(e -> Stream.of(e.getOperatorUserId(), e.getOwnerUserId()))
+                .collect(Collectors.toSet());
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+        return followUpMapper.selectUserDisplayNames(List.copyOf(userIds)).stream()
+                .collect(Collectors.toMap(
+                        FollowUpMapper.UserDisplayName::getUserId,
+                        FollowUpMapper.UserDisplayName::getDisplayName,
+                        (a, b) -> a));
     }
 }

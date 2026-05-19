@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yousells.modules.followup.mapper.FollowUpMapper">
+
+    <resultMap id="followUpMap" type="com.yousells.modules.followup.entity.FollowUpEntity">
+        <id property="id" column="id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="followType" column="follow_type"/>
+        <result property="communicatedContent" column="communicated_content"/>
+        <result property="customerFeedback" column="customer_feedback"/>
+        <result property="currentConcern" column="current_concern"/>
+        <result property="nextAction" column="next_action"/>
+        <result property="nextFollowAt" column="next_follow_at"/>
+        <result property="operatorUserId" column="operator_user_id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="stageBefore" column="stage_before"/>
+        <result property="stageAfter" column="stage_after"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+    </resultMap>
+
+    <select id="pageFollowUps" resultMap="followUpMap">
+        SELECT *
+        FROM customer_follow_ups
+        WHERE is_deleted = 0
+        <if test="customerId != null">
+            AND customer_id = #{customerId}
+        </if>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectUserDisplayNames" resultType="com.yousells.modules.followup.mapper.FollowUpMapper$UserDisplayName">
+        SELECT id AS userId, display_name AS displayName
+        FROM users
+        WHERE id IN
+        <foreach collection="userIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+          AND is_deleted = 0
+    </select>
+
+</mapper>
