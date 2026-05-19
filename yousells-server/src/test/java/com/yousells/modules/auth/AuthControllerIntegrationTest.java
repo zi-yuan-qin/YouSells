@@ -55,4 +55,25 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(4003));
     }
+
+    @Test
+    void shouldRejectMalformedBearerHeader() throws Exception {
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username": "admin",
+                                  "password": "admin123"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String accessToken = JsonTestUtils.readJsonPath(loginResult.getResponse().getContentAsString(), "$.data.accessToken");
+
+        mockMvc.perform(get("/api/auth/me")
+                        .header("Authorization", "Bearer" + accessToken))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(4003));
+    }
 }

@@ -24,7 +24,7 @@
 
 当前代码层已经落地的基础设施：
 
-- `yousells-server`：Spring Boot 后端骨架、Session/Cookie 鉴权基线、统一响应/异常处理、P0 模块接口占位、基础接口测试
+- `yousells-server`：Spring Boot 后端骨架、JWT Bearer Token 鉴权基线、统一响应/异常处理、P0 模块接口占位、基础接口测试
 - `yousells-web`：Vue 3 前端骨架、登录页、主布局、路由守卫、认证 store、API 请求层、P0 页面占位与示例数据联动
 - `yousells-server/src/main/resources/db`：P0 数据库建表脚本与初始化种子数据
 - `docker-compose.yml`：MySQL + Redis 本地开发依赖基线
@@ -36,7 +36,7 @@
 - 缓存：`Redis`
 - 前端：`Vue 3 + TypeScript + Vite + Pinia + Vue Router + Element Plus`
 - 部署：`Nginx + Spring Boot 单体 + Docker Compose`
-- 鉴权：`v1 使用 Session/Cookie，后续预留 JWT 扩展空间`
+- 鉴权：`v1 使用轻量 JWT Bearer Token，后续预留 refresh token / Redis 黑名单扩展空间`
 
 ## 文档目录
 
@@ -74,6 +74,7 @@
   - `Backend: 8080`
   - `Frontend: 5173`
 - 后端如果被全局 Maven 配置劫持到其他私服，优先使用 `yousells-server/.mvn/settings.xml`
+- 后端测试和启动必须使用 `JDK 21`；如果 `mvn -version` 显示 Java 11，需要先切换 `JAVA_HOME` 再执行 Maven
 - 前端在 PowerShell 下如遇 `npm.ps1` 执行策略问题，改用 `cmd /c npm ...`
 
 ## 当前最重要的原则
