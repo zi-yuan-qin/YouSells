@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
+import { ElMessage, type FormInstance, type FormRules } from "element-plus";
 import { useAuthStore } from "@/stores/auth";
 import { RouteName } from "@/router/route-names";
 
@@ -9,12 +9,22 @@ const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 
+const formRef = ref<FormInstance>();
+
 const form = reactive({
   username: "admin",
   password: "admin123"
 });
 
+const rules: FormRules = {
+  username: [{ required: true, message: "请输入账号", trigger: "blur" }],
+  password: [{ required: true, message: "请输入密码", trigger: "blur" }]
+};
+
 async function handleSubmit() {
+  const valid = await formRef.value?.validate().catch(() => false);
+  if (!valid) return;
+
   try {
     await authStore.loginAction(form);
     ElMessage.success("登录成功，已进入 YouSells 工作台");
@@ -47,14 +57,14 @@ async function handleSubmit() {
           <p>当前提供内置演示账号，方便先打通前后端主流程，后续再接正式用户表与权限表。</p>
         </div>
 
-        <el-form class="login-form" label-position="top" @submit.prevent="handleSubmit">
-          <el-form-item label="账号">
+        <el-form ref="formRef" class="login-form" label-position="top" :model="form" :rules="rules" @submit.prevent="handleSubmit">
+          <el-form-item label="账号" prop="username">
             <el-input v-model="form.username" placeholder="请输入账号" />
           </el-form-item>
-          <el-form-item label="密码">
+          <el-form-item label="密码" prop="password">
             <el-input v-model="form.password" type="password" show-password placeholder="请输入密码" />
           </el-form-item>
-          <el-button type="primary" size="large" :loading="authStore.loading" @click="handleSubmit">
+          <el-button type="primary" size="large" :loading="authStore.loading" :disabled="authStore.loading" @click="handleSubmit">
             登录 YouSells
           </el-button>
           <div class="login-tips">

@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
-import EmptyStateCard from "@/components/app/EmptyStateCard.vue";
+import CustomerFilterBar from "@/components/customer-list/CustomerFilterBar.vue";
+import CustomerTable from "@/components/customer-list/CustomerTable.vue";
+import CustomerTagPanel from "@/components/customer-list/CustomerTagPanel.vue";
 import { fetchCustomers } from "@/api/customer-list";
-import type { CustomerListItem, CustomerQuery } from "@/types/customer-list";
+import type { CustomerListItem, CustomerQuery, CustomerTag } from "@/types/customer-list";
+import { RouteName } from "@/router/route-names";
+import { isUnauthorizedError } from "@/utils/request-error";
 
+const router = useRouter();
 const loading = ref(false);
+const error = ref(false);
 const customers = ref<CustomerListItem[]>([]);
 const total = ref(0);
 
@@ -17,16 +24,49 @@ const query = reactive<CustomerQuery>({
 });
 
 async function loadCustomers() {
+  error.value = false;
   loading.value = true;
   try {
     const data = await fetchCustomers(query);
     customers.value = data.list;
     total.value = data.total;
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : "客户列表加载失败");
+  } catch (e) {
+    if (isUnauthorizedError(e)) {
+      return;
+    }
+    error.value = true;
+    ElMessage.error(e instanceof Error ? e.message : "客户列表加载失败");
   } finally {
     loading.value = false;
   }
+}
+
+function onSearch() {
+  void loadCustomers();
+}
+
+function onReset() {
+  void loadCustomers();
+}
+
+function onPageChange(page: number) {
+  query.page = page;
+  void loadCustomers();
+}
+
+function onRowClick(row: CustomerListItem) {
+  router.push({ name: RouteName.CustomerDetail, params: { id: row.id } });
+}
+
+function onQueryUpdate(v: CustomerQuery) {
+  Object.keys(query).forEach(k => delete (query as Record<string, unknown>)[k]);
+  Object.assign(query, v);
+}
+
+function onTagClick(tag: CustomerTag) {
+  query.keyword = tag.tagName;
+  query.page = 1;
+  void loadCustomers();
 }
 
 onMounted(() => {
@@ -38,37 +78,32 @@ onMounted(() => {
   <div class="page-shell">
     <PageSection
       title="客户总表"
-      description="客户列表、筛选和分页基线已经接上接口占位，志明和嘉诚后续可以直接往表格编辑、标签筛选和负责人分配上继续扩。"
+      description="客户列表支持关键词、意向、阶段和来源筛选，点击行跳转客户详情。"
     >
       <template #extra>
         <el-button :loading="loading" @click="loadCustomers">刷新列表</el-button>
       </template>
 
-      <div class="table-summary">
-        <span>当前展示：{{ customers.length }} 条</span>
-        <span>总数：{{ total }}</span>
-        <span>P0 默认分页：20 条/页</span>
+      <CustomerFilterBar :model-value="query" :loading @update:model-value="onQueryUpdate" @search="onSearch" @reset="onReset" />
+
+      <CustomerTagPanel @tag-click="onTagClick" />
+
+      <div v-if="error" class="dashboard-error">
+        <p>数据加载失败，请点击刷新重试</p>
       </div>
 
-      <el-table :data="customers" border stripe v-loading="loading">
-        <el-table-column prop="customerCode" label="客户编号" min-width="150" />
-        <el-table-column prop="nickname" label="昵称" min-width="120" />
-        <el-table-column prop="sourcePlatform" label="来源平台" min-width="110" />
-        <el-table-column prop="intentLevel" label="意向等级" width="100" />
-        <el-table-column prop="currentStage" label="当前阶段" min-width="140" />
-        <el-table-column prop="ownerDisplayName" label="负责人" width="110" />
-        <el-table-column prop="nextFollowAt" label="下次跟进" min-width="170" />
-      </el-table>
-
-      <div class="mini-tag-row">
-        <el-tag v-for="item in customers[0]?.tags ?? []" :key="item" type="info" effect="plain">{{ item }}</el-tag>
+      <div v-else class="table-summary">
+        <span>当前展示：{{ customers.length }} 条 / 共 {{ total }} 条</span>
       </div>
 
-      <EmptyStateCard
-        title="下一步建议"
-        description="把筛选条件、客户新建弹窗、编辑抽屉和跳转详情页补齐，这个页面就能承接 P0 的客户主流程。"
-        owner="嘉诚 + 志明"
-        note="这一页后续一定要做前后端联调测试，尤其是筛选、分页和编辑后的回显。"
+      <CustomerTable
+        :customers
+        :loading
+        :total
+        :page="query.page ?? 1"
+        :page-size="query.pageSize ?? 20"
+        @page-change="onPageChange"
+        @row-click="onRowClick"
       />
     </PageSection>
   </div>

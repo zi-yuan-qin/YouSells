@@ -2,16 +2,25 @@
 import { computed, onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
+import DashboardStatCards from "@/components/dashboard/DashboardStatCards.vue";
+import DashboardTaskList from "@/components/dashboard/DashboardTaskList.vue";
+import DashboardCustomerList from "@/components/dashboard/DashboardCustomerList.vue";
 import { fetchDashboardOverview } from "@/api/dashboard";
 import type { DashboardOverview } from "@/types/dashboard";
 import { isUnauthorizedError } from "@/utils/request-error";
 
 const loading = ref(false);
+const error = ref(false);
 const overview = ref<DashboardOverview | null>(null);
 
 const stats = computed(() => {
   if (!overview.value) {
-    return [];
+    return [
+      { label: "今日待跟进", value: 0 },
+      { label: "逾期客户", value: 0 },
+      { label: "最近新增", value: 0 },
+      { label: "高意向客户", value: 0 }
+    ];
   }
   return [
     { label: "今日待跟进", value: overview.value.todayPendingFollowCount },
@@ -22,14 +31,16 @@ const stats = computed(() => {
 });
 
 async function loadOverview() {
+  error.value = false;
   loading.value = true;
   try {
     overview.value = await fetchDashboardOverview();
-  } catch (error) {
-    if (isUnauthorizedError(error)) {
+  } catch (e) {
+    if (isUnauthorizedError(e)) {
       return;
     }
-    ElMessage.error(error instanceof Error ? error.message : "首页看板加载失败");
+    error.value = true;
+    ElMessage.error(e instanceof Error ? e.message : "首页看板加载失败");
   } finally {
     loading.value = false;
   }
@@ -50,31 +61,15 @@ onMounted(() => {
         <el-button :loading="loading" @click="loadOverview">刷新数据</el-button>
       </template>
 
-      <div class="stats-grid">
-        <div v-for="item in stats" :key="item.label" class="stat-card">
-          <div class="stat-card__label">{{ item.label }}</div>
-          <div class="stat-card__value">{{ item.value }}</div>
-        </div>
+      <DashboardStatCards :stats :loading />
+
+      <div v-if="error" class="dashboard-error">
+        <p>数据加载失败，请点击刷新重试</p>
       </div>
 
-      <div class="split-grid" v-if="overview">
-        <div class="list-card">
-          <h3>今日公共安排</h3>
-          <ul>
-            <li v-for="task in overview.todayTasks" :key="task.taskId">
-              {{ task.taskTitle }}｜{{ task.status }}｜{{ task.ownerDisplayName }}｜截止 {{ task.dueAt }}
-            </li>
-          </ul>
-        </div>
-
-        <div class="list-card">
-          <h3>重点客户</h3>
-          <ul>
-            <li v-for="customer in overview.focusCustomers" :key="customer.customerId">
-              {{ customer.nickname }}｜{{ customer.intentLevel }} 类｜{{ customer.currentStage }}｜下次 {{ customer.nextFollowAt }}
-            </li>
-          </ul>
-        </div>
+      <div v-else-if="overview" class="split-grid">
+        <DashboardTaskList :tasks="overview.todayTasks" :loading />
+        <DashboardCustomerList :customers="overview.focusCustomers" :loading />
       </div>
     </PageSection>
   </div>
