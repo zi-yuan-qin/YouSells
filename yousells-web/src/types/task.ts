@@ -15,3 +15,24 @@ export interface TaskBoardColumn {
   title: string;
   items: TaskBoardItem[];
 }
+
+export interface TaskCreateRequest {
+  taskTitle: string;
+  taskType?: string | null;
+  taskDescription?: string | null;
+  priority?: string;
+  ownerUserId: number;
+  assistantUserId?: number | null;
+  dueAt?: string | null;
+}
+
+export interface TaskUpdateRequest {
+  taskTitle: string;
+  status: string;
+  taskDescription?: string | null;
+  priority?: string;
+  ownerUserId: number;
+  assistantUserId?: number | null;
+  dueAt?: string | null;
+  nextAction?: string | null;
+}

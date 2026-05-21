@@ -5,6 +5,11 @@ import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
 import { stageLabel, followTypeLabel } from "@/constants/stage";
 import { friendlyDate, datetime } from "@/utils/format";
+import CustomerProfileCard from "@/components/customer-detail/CustomerProfileCard.vue";
+import CustomerMetaPanel from "@/components/customer-detail/CustomerMetaPanel.vue";
+import CustomerNextActionCard from "@/components/customer-detail/CustomerNextActionCard.vue";
+import FollowUpTimeline from "@/components/followup/FollowUpTimeline.vue";
+import FollowUpCreateForm from "@/components/followup/FollowUpCreateForm.vue";
 import { fetchCustomerDetail } from "@/api/customer-detail";
 import { fetchFollowUps } from "@/api/followup";
 import type { CustomerDetail } from "@/types/customer-detail";
@@ -32,6 +37,14 @@ async function loadData() {
   }
 }
 
+async function onDetailUpdated() {
+  await loadData();
+}
+
+async function onFollowUpCreated() {
+  await loadData();
+}
+
 onMounted(() => {
   void loadData();
 });
@@ -47,49 +60,76 @@ onMounted(() => {
         <el-button :loading="loading" @click="loadData">刷新详情</el-button>
       </template>
 
-      <div v-if="detail" class="detail-grid">
-        <div class="detail-item">
-          <div class="detail-item__label">客户昵称</div>
-          <div class="detail-item__value">{{ detail.nickname }}</div>
+      <div v-if="detail" class="customer-detail-grid">
+        <div class="customer-detail-grid__left">
+          <CustomerProfileCard
+            :detail="detail"
+            :loading="loading"
+            @updated="onDetailUpdated"
+          />
         </div>
-        <div class="detail-item">
-          <div class="detail-item__label">联系方式</div>
-          <div class="detail-item__value">{{ detail.contactValue }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item__label">当前阶段</div>
-          <div class="detail-item__value">{{ stageLabel(detail.currentStage) }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item__label">当前顾虑</div>
-          <div class="detail-item__value">{{ detail.currentConcern || "暂无" }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item__label">负责人 / 协助人</div>
-          <div class="detail-item__value">{{ detail.ownerDisplayName }} / {{ detail.assistantDisplayName || "暂无" }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-item__label">下次跟进</div>
-          <div class="detail-item__value">{{ detail.nextFollowAction || "暂无" }}｜{{ friendlyDate(detail.nextFollowAt) }}</div>
+
+        <div class="customer-detail-grid__right">
+          <CustomerMetaPanel
+            :detail="detail"
+            :loading="loading"
+            @tags-updated="onDetailUpdated"
+          />
+
+          <CustomerNextActionCard
+            :detail="detail"
+            :loading="loading"
+            @updated="onDetailUpdated"
+          />
         </div>
       </div>
 
-      <div>
-        <div class="page-section__title" style="font-size: 18px;">跟进时间线</div>
-        <div v-if="followUps.length === 0" class="list-card__placeholder" style="margin-top: 12px;">暂无跟进记录</div>
-        <div v-for="item in followUps" :key="item.id" class="timeline-card">
-          <div class="timeline-card__meta">
-            {{ datetime(item.createdAt) }}｜{{ followTypeLabel(item.followType) }}｜{{ item.operatorDisplayName }}
-          </div>
-          <div class="timeline-card__content">
-            {{ item.communicatedContent }}
-            <br />
-            客户反馈：{{ item.customerFeedback || "暂无" }}
-            <br />
-            下一步：{{ item.nextAction || "暂无" }}
-          </div>
+      <el-empty v-else-if="!loading" description="未找到客户信息" />
+
+      <div v-if="detail">
+        <div class="followup-section-header">
+          <h3 class="page-section__title" style="font-size: 18px; margin: 0">
+            跟进时间线
+          </h3>
+          <FollowUpCreateForm
+            :customer-id="detail.id"
+            @created="onFollowUpCreated"
+          />
         </div>
+        <FollowUpTimeline
+          :follow-ups="followUps"
+          :loading="loading"
+        />
       </div>
     </PageSection>
   </div>
 </template>
+
+<style scoped>
+.customer-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.customer-detail-grid__left,
+.customer-detail-grid__right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.followup-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .customer-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

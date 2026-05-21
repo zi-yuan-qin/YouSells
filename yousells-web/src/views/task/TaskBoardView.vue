@@ -2,12 +2,16 @@
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
-import EmptyStateCard from "@/components/app/EmptyStateCard.vue";
+import TaskBoardToolbar from "@/components/task/TaskBoardToolbar.vue";
+import TaskBoardColumn from "@/components/task/TaskBoardColumn.vue";
+import TaskEditDialog from "@/components/task/TaskEditDialog.vue";
 import { fetchTaskBoard } from "@/api/task";
-import type { TaskBoardColumn } from "@/types/task";
+import type { TaskBoardColumn as TaskBoardColumnType, TaskBoardItem } from "@/types/task";
 
 const loading = ref(false);
-const columns = ref<TaskBoardColumn[]>([]);
+const columns = ref<TaskBoardColumnType[]>([]);
+const dialogVisible = ref(false);
+const editingTask = ref<TaskBoardItem | null>(null);
 
 async function loadBoard() {
   loading.value = true;
@@ -20,6 +24,25 @@ async function loadBoard() {
   }
 }
 
+function openCreateDialog() {
+  editingTask.value = null;
+  dialogVisible.value = true;
+}
+
+function openEditDialog(task: TaskBoardItem) {
+  editingTask.value = task;
+  dialogVisible.value = true;
+}
+
+function onDialogClose() {
+  dialogVisible.value = false;
+  editingTask.value = null;
+}
+
+async function onTaskSaved() {
+  await loadBoard();
+}
+
 onMounted(() => {
   void loadBoard();
 });
@@ -29,29 +52,46 @@ onMounted(() => {
   <div class="page-shell">
     <PageSection
       title="公共安排区"
-      description="任务看板接口已经接好，后续可以继续补拖拽状态流转、负责人筛选和优先级视图。"
+      description="任务看板，按待开始 / 进行中 / 已完成分列展示"
     >
-      <template #extra>
-        <el-button :loading="loading" @click="loadBoard">刷新看板</el-button>
-      </template>
+      <TaskBoardToolbar
+        :loading="loading"
+        @refresh="loadBoard"
+        @create-task="openCreateDialog"
+      />
 
-      <div class="split-grid">
-        <div v-for="column in columns" :key="column.status" class="list-card">
-          <h3>{{ column.title }}</h3>
-          <ul>
-            <li v-for="item in column.items" :key="item.id">
-              {{ item.taskTitle }}｜{{ item.priority }}｜{{ item.ownerDisplayName }}｜{{ item.dueAt || "未设置截止时间" }}
-            </li>
-          </ul>
-        </div>
+      <div class="board-grid">
+        <TaskBoardColumn
+          v-for="column in columns"
+          :key="column.status"
+          :column="column"
+          :loading="loading"
+          @task-click="openEditDialog"
+        />
       </div>
 
-      <EmptyStateCard
-        title="下一步建议"
-        description="把新增任务、编辑任务、状态变更和看板拖拽补齐后，这个模块就能承接团队公共安排。"
-        owner="许润 + 哲涛"
-        note="这个模块后续需要做前后端联调，尤其是状态流转、截止时间和负责人变更。"
-      />
+      <el-empty v-if="!loading && columns.length === 0" description="暂无任务数据" />
     </PageSection>
+
+    <TaskEditDialog
+      :visible="dialogVisible"
+      :task="editingTask"
+      @close="onDialogClose"
+      @saved="onTaskSaved"
+    />
   </div>
 </template>
+
+<style scoped>
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .board-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
