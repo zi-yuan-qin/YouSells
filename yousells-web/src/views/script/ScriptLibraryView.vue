@@ -2,23 +2,46 @@
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
-import EmptyStateCard from "@/components/app/EmptyStateCard.vue";
+import ScriptCategoryTabs from "@/components/script/ScriptCategoryTabs.vue";
+import ScriptTable from "@/components/script/ScriptTable.vue";
+import ScriptPreviewDrawer from "@/components/script/ScriptPreviewDrawer.vue";
+import ScriptEditDialog from "@/components/script/ScriptEditDialog.vue";
 import { fetchScriptCategories, fetchScripts } from "@/api/script";
 import type { ScriptCategory, ScriptItem } from "@/types/script";
 
 const loading = ref(false);
 const categories = ref<ScriptCategory[]>([]);
 const scripts = ref<ScriptItem[]>([]);
+const total = ref(0);
+const page = ref(1);
+const pageSize = ref(20);
+const activeCategoryId = ref<number | null>(null);
+const keyword = ref("");
 
-async function loadScripts() {
+const drawerVisible = ref(false);
+const previewScript = ref<ScriptItem | null>(null);
+const editDialogVisible = ref(false);
+const editingScript = ref<ScriptItem | null>(null);
+
+async function loadCategories() {
+  try {
+    categories.value = await fetchScriptCategories();
+  } catch {
+    // silent
+  }
+}
+
+async function loadScripts(p = 1, ps = 20) {
   loading.value = true;
   try {
-    const [categoryData, scriptData] = await Promise.all([
-      fetchScriptCategories(),
-      fetchScripts()
-    ]);
-    categories.value = categoryData;
-    scripts.value = scriptData.list;
+    const params: Record<string, unknown> = { page: p, pageSize: ps };
+    if (activeCategoryId.value) params.categoryId = activeCategoryId.value;
+    if (keyword.value) params.keyword = keyword.value;
+    const data = await fetchScripts(params as any);
+    scripts.value = data.list;
+    total.value = data.total;
+    page.value = p;
+    pageSize.value = ps;
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : "话术库加载失败");
   } finally {
@@ -26,7 +49,51 @@ async function loadScripts() {
   }
 }
 
+function onCategoryChange(catId: number | null) {
+  activeCategoryId.value = catId;
+  void loadScripts(1, pageSize.value);
+}
+
+function onSearch(kw: string) {
+  keyword.value = kw;
+  void loadScripts(1, pageSize.value);
+}
+
+function onPageChange(p: number, ps: number) {
+  void loadScripts(p, ps);
+}
+
+function openView(script: ScriptItem) {
+  previewScript.value = script;
+  drawerVisible.value = true;
+}
+
+function openCreate() {
+  editingScript.value = null;
+  editDialogVisible.value = true;
+}
+
+function openEdit(script: ScriptItem) {
+  editingScript.value = script;
+  editDialogVisible.value = true;
+}
+
+function onDrawerClose() {
+  drawerVisible.value = false;
+  previewScript.value = null;
+}
+
+function onEditDialogClose() {
+  editDialogVisible.value = false;
+  editingScript.value = null;
+}
+
+function onSaved() {
+  void loadScripts(page.value, pageSize.value);
+}
+
 onMounted(() => {
+  void loadCategories();
   void loadScripts();
 });
 </script>
@@ -34,31 +101,43 @@ onMounted(() => {
 <template>
   <div class="page-shell">
     <PageSection
-      title="话术库页面"
-      description="分类接口和列表接口都已经接上，后续可以继续补编辑器、分类筛选和详情抽屉。"
+      title="话术库"
+      description="分类管理、话术沉淀与快速检索"
     >
-      <template #extra>
-        <el-button :loading="loading" @click="loadScripts">刷新话术库</el-button>
-      </template>
+      <ScriptCategoryTabs
+        :categories="categories"
+        :active-category-id="activeCategoryId"
+        @change="onCategoryChange"
+      />
 
-      <div class="mini-tag-row">
-        <el-tag v-for="category in categories" :key="category.id" effect="plain">{{ category.categoryName }}</el-tag>
-      </div>
-
-      <el-table :data="scripts" border stripe v-loading="loading">
-        <el-table-column prop="categoryName" label="分类" min-width="120" />
-        <el-table-column prop="title" label="标题" min-width="180" />
-        <el-table-column prop="applicableScene" label="适用场景" min-width="220" />
-        <el-table-column prop="status" label="状态" width="100" />
-        <el-table-column prop="updatedAt" label="更新时间" min-width="170" />
-      </el-table>
-
-      <EmptyStateCard
-        title="联调提醒"
-        description="话术库模块后续接编辑功能时要同步验证分类切换、详情回显和保存后的列表刷新。"
-        owner="许润 + 哲涛"
-        note="这是页面交互比较集中的模块，后面一定要做实际表单联调。"
+      <ScriptTable
+        :scripts="scripts"
+        :loading="loading"
+        :total="total"
+        :page="page"
+        :page-size="pageSize"
+        @page-change="onPageChange"
+        @view="openView"
+        @edit="openEdit"
+        @create="openCreate"
+        @search="onSearch"
       />
     </PageSection>
+
+    <ScriptPreviewDrawer
+      :visible="drawerVisible"
+      :script="previewScript"
+      :loading="loading"
+      @close="onDrawerClose"
+      @edit="(s) => { onDrawerClose(); openEdit(s); }"
+    />
+
+    <ScriptEditDialog
+      :visible="editDialogVisible"
+      :script="editingScript"
+      :categories="categories"
+      @close="onEditDialogClose"
+      @saved="onSaved"
+    />
   </div>
 </template>

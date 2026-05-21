@@ -15,3 +15,17 @@ export interface WeeklyReport {
   issues: string | null;
   nextWeekPlan: string;
 }
+
+export interface DailyReportCreateRequest {
+  reportDate: string;
+  todayWork: string;
+  issues?: string | null;
+  tomorrowPlan: string;
+}
+
+export interface WeeklyReportCreateRequest {
+  weekKey: string;
+  weeklySummary: string;
+  issues?: string | null;
+  nextWeekPlan: string;
+}

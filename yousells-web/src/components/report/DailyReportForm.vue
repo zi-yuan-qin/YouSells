@@ -1,0 +1,122 @@
+<script setup lang="ts">
+import { ref, reactive } from "vue";
+import { ElMessage } from "element-plus";
+import type { DailyReportCreateRequest } from "@/types/report";
+import { createDailyReport } from "@/api/report";
+
+const emit = defineEmits<{
+  submitted: [];
+}>();
+
+const submitting = ref(false);
+const formRef = ref();
+
+const form = reactive<DailyReportCreateRequest>({
+  reportDate: new Date().toISOString().slice(0, 10),
+  todayWork: "",
+  issues: null,
+  tomorrowPlan: ""
+});
+
+const rules = {
+  reportDate: [{ required: true, message: "请选择日期", trigger: "change" }],
+  todayWork: [{ required: true, message: "请填写今日完成工作", trigger: "blur" }],
+  tomorrowPlan: [{ required: true, message: "请填写明日计划", trigger: "blur" }]
+};
+
+async function submit() {
+  const valid = await formRef.value?.validate().catch(() => false);
+  if (!valid) return;
+
+  submitting.value = true;
+  try {
+    await createDailyReport({
+      reportDate: form.reportDate,
+      todayWork: form.todayWork,
+      issues: form.issues || null,
+      tomorrowPlan: form.tomorrowPlan
+    });
+    form.todayWork = "";
+    form.issues = null;
+    form.tomorrowPlan = "";
+    emit("submitted");
+    ElMessage.success("日报已提交");
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : "提交失败");
+  } finally {
+    submitting.value = false;
+  }
+}
+</script>
+
+<template>
+  <div class="report-form-card">
+    <h3 class="report-form-card__title">提交日报</h3>
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="90px"
+      label-position="top"
+    >
+      <el-form-item label="日期" prop="reportDate">
+        <el-date-picker
+          v-model="form.reportDate"
+          type="date"
+          placeholder="选择日期"
+          style="width: 100%"
+          value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+
+      <el-form-item label="今日完成工作" prop="todayWork">
+        <el-input
+          v-model="form.todayWork"
+          type="textarea"
+          :rows="3"
+          placeholder="今天完成了哪些工作"
+        />
+      </el-form-item>
+
+      <el-form-item label="遇到的问题">
+        <el-input
+          v-model="form.issues"
+          type="textarea"
+          :rows="2"
+          placeholder="遇到了什么问题或困难"
+        />
+      </el-form-item>
+
+      <el-form-item label="明日计划" prop="tomorrowPlan">
+        <el-input
+          v-model="form.tomorrowPlan"
+          type="textarea"
+          :rows="2"
+          placeholder="明天计划做什么"
+        />
+      </el-form-item>
+
+      <el-button
+        type="primary"
+        :loading="submitting"
+        @click="submit"
+      >
+        提交日报
+      </el-button>
+    </el-form>
+  </div>
+</template>
+
+<style scoped>
+.report-form-card {
+  background: #fafcff;
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid rgba(37, 99, 235, 0.06);
+}
+
+.report-form-card__title {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+</style>
