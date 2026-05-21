@@ -78,7 +78,7 @@ onMounted(() => {
   <div class="page-shell">
     <PageSection
       title="客户总表"
-      description="客户列表支持关键词、意向、阶段和来源筛选，点击行跳转客户详情。"
+      description="统一管理客户线索与跟进状态，支持多维度筛选与快速定位。"
     >
       <template #extra>
         <el-button :loading="loading" @click="loadCustomers">刷新列表</el-button>

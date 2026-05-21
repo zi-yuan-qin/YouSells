@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { DashboardTaskReminder } from "@/types/dashboard";
+import { taskStatusLabel } from "@/constants/stage";
+import { friendlyDate } from "@/utils/format";
 
 defineProps<{
   tasks: DashboardTaskReminder[];
@@ -14,7 +16,7 @@ defineProps<{
     <p v-else-if="tasks.length === 0" class="list-card__placeholder">暂无今日安排</p>
     <ul v-else>
       <li v-for="task in tasks" :key="task.taskId">
-        {{ task.taskTitle }}｜{{ task.status }}｜{{ task.ownerDisplayName }}｜截止 {{ task.dueAt }}
+        {{ task.taskTitle }}｜{{ taskStatusLabel(task.status) }}｜{{ task.ownerDisplayName }}｜{{ friendlyDate(task.dueAt) }}
       </li>
     </ul>
   </div>

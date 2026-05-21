@@ -54,7 +54,7 @@ async function handleSubmit() {
       <section class="login-panel__form">
         <div class="login-form__header">
           <h1>进入项目工作台</h1>
-          <p>当前提供内置演示账号，方便先打通前后端主流程，后续再接正式用户表与权限表。</p>
+          <p>YouSells 团队工作台，P0 阶段先行接入核心业务主流程。</p>
         </div>
 
         <el-form ref="formRef" class="login-form" label-position="top" :model="form" :rules="rules" @submit.prevent="handleSubmit">

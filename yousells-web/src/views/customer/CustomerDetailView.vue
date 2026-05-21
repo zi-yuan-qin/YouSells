@@ -3,7 +3,8 @@ import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
-import EmptyStateCard from "@/components/app/EmptyStateCard.vue";
+import { stageLabel, followTypeLabel } from "@/constants/stage";
+import { friendlyDate, datetime } from "@/utils/format";
 import { fetchCustomerDetail } from "@/api/customer-detail";
 import { fetchFollowUps } from "@/api/followup";
 import type { CustomerDetail } from "@/types/customer-detail";
@@ -40,7 +41,7 @@ onMounted(() => {
   <div class="page-shell">
     <PageSection
       title="客户详情与跟进记录"
-      description="这一页已经把详情接口和跟进记录接口串起来了，后续许润可以直接补编辑区、时间线表单和下一次跟进联动。"
+      description="客户详细信息、跟进记录与下一步行动计划。"
     >
       <template #extra>
         <el-button :loading="loading" @click="loadData">刷新详情</el-button>
@@ -57,7 +58,7 @@ onMounted(() => {
         </div>
         <div class="detail-item">
           <div class="detail-item__label">当前阶段</div>
-          <div class="detail-item__value">{{ detail.currentStage }}</div>
+          <div class="detail-item__value">{{ stageLabel(detail.currentStage) }}</div>
         </div>
         <div class="detail-item">
           <div class="detail-item__label">当前顾虑</div>
@@ -69,15 +70,16 @@ onMounted(() => {
         </div>
         <div class="detail-item">
           <div class="detail-item__label">下次跟进</div>
-          <div class="detail-item__value">{{ detail.nextFollowAction }}｜{{ detail.nextFollowAt }}</div>
+          <div class="detail-item__value">{{ detail.nextFollowAction || "暂无" }}｜{{ friendlyDate(detail.nextFollowAt) }}</div>
         </div>
       </div>
 
       <div>
         <div class="page-section__title" style="font-size: 18px;">跟进时间线</div>
+        <div v-if="followUps.length === 0" class="list-card__placeholder" style="margin-top: 12px;">暂无跟进记录</div>
         <div v-for="item in followUps" :key="item.id" class="timeline-card">
           <div class="timeline-card__meta">
-            {{ item.createdAt }}｜{{ item.followType }}｜{{ item.operatorDisplayName }}
+            {{ datetime(item.createdAt) }}｜{{ followTypeLabel(item.followType) }}｜{{ item.operatorDisplayName }}
           </div>
           <div class="timeline-card__content">
             {{ item.communicatedContent }}
@@ -88,13 +90,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
-      <EmptyStateCard
-        title="联调提醒"
-        description="客户详情页会同时牵涉详情接口、跟进记录接口和下一次跟进更新接口，这一页后续必须做页面联调与提交流程测试。"
-        owner="许润 + 志明"
-        note="重点测试详情刷新、时间线新增后回显、下一次跟进字段同步更新。"
-      />
     </PageSection>
   </div>
 </template>

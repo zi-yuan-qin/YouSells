@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 INSERT INTO roles (role_code, role_name, description)
 VALUES
     ('ADMIN', '管理员', '拥有项目内全部管理权限'),

@@ -55,7 +55,7 @@ onMounted(() => {
   <div class="page-shell">
     <PageSection
       title="首页看板"
-      description="这里已经接上了首页概览接口，后续嘉诚可以直接在这个壳子里继续补仪表卡片、预警列表和更多联动数据。"
+      description="团队客户跟进概览，一眼看清今日待办、重点客户与协作进度。"
     >
       <template #extra>
         <el-button :loading="loading" @click="loadOverview">刷新数据</el-button>

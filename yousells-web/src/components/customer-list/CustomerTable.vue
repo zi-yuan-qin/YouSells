@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { CustomerListItem } from "@/types/customer-list";
+import { stageLabel, intentLabel } from "@/constants/stage";
+import { relativeDate } from "@/utils/format";
 
 defineProps<{
   customers: CustomerListItem[];
@@ -28,10 +30,22 @@ const emit = defineEmits<{
       <el-table-column prop="customerCode" label="客户编号" min-width="150" />
       <el-table-column prop="nickname" label="昵称" min-width="120" />
       <el-table-column prop="sourcePlatform" label="来源平台" min-width="110" />
-      <el-table-column prop="intentLevel" label="意向等级" width="100" />
-      <el-table-column prop="currentStage" label="当前阶段" min-width="140" />
+      <el-table-column prop="intentLevel" label="意向等级" width="130">
+        <template #default="{ row }">
+          {{ intentLabel(row.intentLevel) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="currentStage" label="当前阶段" min-width="120">
+        <template #default="{ row }">
+          {{ stageLabel(row.currentStage) }}
+        </template>
+      </el-table-column>
       <el-table-column prop="ownerDisplayName" label="负责人" width="110" />
-      <el-table-column prop="nextFollowAt" label="下次跟进" min-width="170" />
+      <el-table-column prop="nextFollowAt" label="下次跟进" min-width="130">
+        <template #default="{ row }">
+          {{ relativeDate(row.nextFollowAt) }}
+        </template>
+      </el-table-column>
       <el-table-column label="标签" min-width="150">
         <template #default="{ row }">
           <template v-if="row.tags.length">
