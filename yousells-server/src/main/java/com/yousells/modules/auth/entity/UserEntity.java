@@ -5,8 +5,6 @@ import com.yousells.common.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("users")
@@ -16,15 +14,11 @@ public class UserEntity extends BaseEntity {
 
     private String passwordHash;
 
-    private String displayName;
-
     private String realName;
 
-    private String phone;
+    private String level;
 
-    private String email;
+    private Long managerUserId;
 
     private String status;
-
-    private LocalDateTime lastLoginAt;
 }

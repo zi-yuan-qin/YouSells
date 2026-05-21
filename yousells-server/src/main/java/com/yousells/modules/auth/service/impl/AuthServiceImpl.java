@@ -17,8 +17,6 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -41,11 +39,11 @@ public class AuthServiceImpl implements AuthService {
 
     @PostConstruct
     void seedUsers() {
-        seedUserIfNotExists(1L, "admin", "系统管理员", "admin123", List.of("ADMIN"));
-        seedUserIfNotExists(2L, "member", "普通成员", "member123", List.of("MEMBER"));
+        seedUserIfNotExists(1L, "admin", "秦梓源", "T2", null, "admin123");
+        seedUserIfNotExists(2L, "member", "小赵", "T0", 1L, "member123");
     }
 
-    private void seedUserIfNotExists(Long id, String username, String displayName, String rawPassword, List<String> roles) {
+    private void seedUserIfNotExists(Long id, String username, String realName, String level, Long managerUserId, String rawPassword) {
         if (userMapper.selectById(id) != null) {
             return;
         }
@@ -53,7 +51,9 @@ public class AuthServiceImpl implements AuthService {
         user.setId(id);
         user.setUsername(username);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
-        user.setDisplayName(displayName);
+        user.setRealName(realName);
+        user.setLevel(level);
+        user.setManagerUserId(managerUserId);
         user.setStatus("ACTIVE");
         userMapper.insert(user);
     }
@@ -69,8 +69,9 @@ public class AuthServiceImpl implements AuthService {
         LoginUser loginUser = new LoginUser(
                 user.getId(),
                 user.getUsername(),
-                user.getDisplayName(),
-                List.of("ADMIN")
+                user.getRealName(),
+                user.getLevel(),
+                user.getManagerUserId()
         );
         return new LoginResultVo(
                 jwtTokenProvider.createAccessToken(loginUser),
@@ -93,8 +94,9 @@ public class AuthServiceImpl implements AuthService {
         return new CurrentUserVo(
                 loginUser.userId(),
                 loginUser.username(),
-                loginUser.displayName(),
-                loginUser.roles()
+                loginUser.realName(),
+                loginUser.level(),
+                loginUser.managerUserId()
         );
     }
 }

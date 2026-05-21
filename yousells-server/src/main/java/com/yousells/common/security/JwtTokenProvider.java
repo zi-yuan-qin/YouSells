@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
 @Component
 public class JwtTokenProvider {
@@ -32,8 +31,9 @@ public class JwtTokenProvider {
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expireAt))
                 .claim("username", loginUser.username())
-                .claim("displayName", loginUser.displayName())
-                .claim("roles", loginUser.roles())
+                .claim("realName", loginUser.realName())
+                .claim("level", loginUser.level())
+                .claim("managerUserId", loginUser.managerUserId())
                 .signWith(secretKey)
                 .compact();
     }
@@ -46,9 +46,9 @@ public class JwtTokenProvider {
                 .getPayload();
         Long userId = Long.valueOf(claims.getSubject());
         String username = claims.get("username", String.class);
-        String displayName = claims.get("displayName", String.class);
-        @SuppressWarnings("unchecked")
-        List<String> roles = claims.get("roles", List.class);
-        return new LoginUser(userId, username, displayName, roles);
+        String realName = claims.get("realName", String.class);
+        String level = claims.get("level", String.class);
+        Long managerUserId = claims.get("managerUserId", Long.class);
+        return new LoginUser(userId, username, realName, level, managerUserId);
     }
 }
