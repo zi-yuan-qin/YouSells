@@ -4,11 +4,13 @@ import com.yousells.common.response.ApiResponse;
 import com.yousells.common.response.IdResponse;
 import com.yousells.common.response.PageResponse;
 import com.yousells.modules.task.dto.TaskCreateRequest;
+import com.yousells.modules.task.dto.TaskLogCreateRequest;
 import com.yousells.modules.task.dto.TaskQueryRequest;
-import com.yousells.modules.task.dto.TaskUpdateRequest;
+import com.yousells.modules.task.dto.TaskStatusUpdateRequest;
 import com.yousells.modules.task.service.TaskBoardService;
 import com.yousells.modules.task.vo.TaskBoardColumnVo;
 import com.yousells.modules.task.vo.TaskBoardItemVo;
+import com.yousells.modules.task.vo.TaskDetailWithLogsVo;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,14 +42,27 @@ public class TaskController {
         return ApiResponse.success(taskBoardService.listBoard());
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<TaskDetailWithLogsVo> detail(@PathVariable Long id) {
+        return ApiResponse.success(taskBoardService.getTask(id));
+    }
+
     @PostMapping
     public ApiResponse<IdResponse> create(@Valid @RequestBody TaskCreateRequest request) {
         return ApiResponse.success(new IdResponse(taskBoardService.createTask(request)));
     }
 
-    @PutMapping("/{id}")
-    public ApiResponse<Void> update(@PathVariable Long id, @Valid @RequestBody TaskUpdateRequest request) {
-        taskBoardService.updateTask(id, request);
+    @PutMapping("/{id}/status")
+    public ApiResponse<Void> updateStatus(@PathVariable Long id,
+                                          @Valid @RequestBody TaskStatusUpdateRequest request) {
+        taskBoardService.updateTaskStatus(id, request);
+        return ApiResponse.success();
+    }
+
+    @PostMapping("/{id}/logs")
+    public ApiResponse<Void> addLog(@PathVariable Long id,
+                                    @Valid @RequestBody TaskLogCreateRequest request) {
+        taskBoardService.addTaskLog(id, request);
         return ApiResponse.success();
     }
 }

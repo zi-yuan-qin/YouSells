@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 public record TaskBoardItemVo(
         Long id,
         String taskTitle,
-        String taskType,
+        String direction,
         String status,
         String priority,
         String ownerDisplayName,
-        String assistantDisplayName,
-        LocalDateTime dueAt,
-        String nextAction
+        String creatorDisplayName,
+        String suggestedToDisplayName,
+        LocalDateTime dueAt
 ) {
 }

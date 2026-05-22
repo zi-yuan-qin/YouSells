@@ -16,11 +16,20 @@ public class TaskBoardEntity extends BaseEntity {
     @TableField("task_title")
     private String taskTitle;
 
-    @TableField("task_type")
-    private String taskType;
-
     @TableField("task_description")
     private String taskDescription;
+
+    @TableField("direction")
+    private String direction;
+
+    @TableField("owner_user_id")
+    private Long ownerUserId;
+
+    @TableField("creator_user_id")
+    private Long creatorUserId;
+
+    @TableField("suggested_to_user_id")
+    private Long suggestedToUserId;
 
     @TableField("status")
     private String status;
@@ -28,18 +37,6 @@ public class TaskBoardEntity extends BaseEntity {
     @TableField("priority")
     private String priority;
 
-    @TableField("owner_user_id")
-    private Long ownerUserId;
-
-    @TableField("assistant_user_id")
-    private Long assistantUserId;
-
-    @TableField("start_at")
-    private LocalDateTime startAt;
-
     @TableField("due_at")
     private LocalDateTime dueAt;
-
-    @TableField("next_action")
-    private String nextAction;
 }

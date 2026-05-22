@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yousells.modules.task.mapper.TaskLogMapper">
+    <select id="selectByTaskId" resultType="com.yousells.modules.task.vo.TaskLogVo">
+        SELECT tl.id, tl.task_id, tl.user_id, u.real_name AS userRealName,
+               tl.type, tl.content, tl.from_status, tl.to_status, tl.created_at
+        FROM task_logs tl LEFT JOIN users u ON tl.user_id = u.id
+        WHERE tl.task_id = #{taskId} ORDER BY tl.created_at ASC
+    </select>
+</mapper>

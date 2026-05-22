@@ -2,199 +2,283 @@ package com.yousells.modules.task;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yousells.common.constant.ErrorCodeConstants;
-import com.yousells.common.constant.TaskStatusConstants;
 import com.yousells.common.exception.BusinessException;
 import com.yousells.common.response.PageResponse;
+import com.yousells.common.security.LoginUser;
+import com.yousells.common.security.SecurityUserContext;
+import com.yousells.modules.auth.mapper.UserMapper;
 import com.yousells.modules.task.dto.TaskCreateRequest;
+import com.yousells.modules.task.dto.TaskLogCreateRequest;
 import com.yousells.modules.task.dto.TaskQueryRequest;
-import com.yousells.modules.task.dto.TaskUpdateRequest;
+import com.yousells.modules.task.dto.TaskStatusUpdateRequest;
 import com.yousells.modules.task.entity.TaskBoardEntity;
+import com.yousells.modules.task.entity.TaskLogEntity;
 import com.yousells.modules.task.mapper.TaskBoardMapper;
+import com.yousells.modules.task.mapper.TaskLogMapper;
 import com.yousells.modules.task.service.impl.TaskBoardServiceImpl;
 import com.yousells.modules.task.vo.TaskBoardColumnVo;
 import com.yousells.modules.task.vo.TaskBoardItemVo;
+import com.yousells.modules.task.vo.TaskDetailVo;
+import com.yousells.modules.task.vo.TaskDetailWithLogsVo;
+import com.yousells.modules.task.vo.TaskLogVo;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.mockito.Mockito;
-
 class TaskBoardServiceTest {
 
-    private final TaskBoardMapper taskBoardMapper = mock(TaskBoardMapper.class);
-    private final TaskBoardServiceImpl service = new TaskBoardServiceImpl(taskBoardMapper);
+    @Mock
+    private TaskBoardMapper taskBoardMapper;
 
-    private static final List<TaskBoardItemVo> SAMPLE_TASKS = List.of(
-            new TaskBoardItemVo(301L, "整理高意向客户回访清单", "CUSTOMER", "IN_PROGRESS", "HIGH",
-                    "秦梓源", "志明", LocalDateTime.of(2026, 5, 18, 20, 0), "今晚补齐名单"),
-            new TaskBoardItemVo(302L, "补齐日报模板字段说明", "REPORT", "TODO", "MEDIUM",
-                    "志明", null, LocalDateTime.of(2026, 5, 18, 22, 0), "写完后发群里确认"),
-            new TaskBoardItemVo(303L, "整理话术库首版分类", "SCRIPT", "DONE", "MEDIUM",
-                    "哲涛", "许润", LocalDateTime.of(2026, 5, 17, 18, 0), "已进入评审"),
-            new TaskBoardItemVo(304L, "确认小镇Coders海报文案", "GROUP", "BLOCKED", "HIGH",
-                    "嘉诚", "许润", LocalDateTime.of(2026, 5, 18, 16, 0), "等设计稿"),
-            new TaskBoardItemVo(305L, "联调首页看板字段", "DASHBOARD", "TODO", "HIGH",
-                    "秦梓源", "嘉诚", null, "等后端接口真实化")
-    );
+    @Mock
+    private TaskLogMapper taskLogMapper;
+
+    @Mock
+    private UserMapper userMapper;
+
+    private TaskBoardServiceImpl service;
+    private MockedStatic<SecurityUserContext> securityContextMock;
+
+    private static final LoginUser TEST_USER = new LoginUser(1L, "admin", "秦梓源", "T2", null);
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        service = new TaskBoardServiceImpl(taskBoardMapper, taskLogMapper, userMapper);
+        securityContextMock = Mockito.mockStatic(SecurityUserContext.class);
+        securityContextMock.when(SecurityUserContext::getCurrentUser).thenReturn(TEST_USER);
+        securityContextMock.when(SecurityUserContext::requireCurrentUser).thenReturn(TEST_USER);
+    }
+
+    @AfterEach
+    void tearDown() {
+        securityContextMock.close();
+    }
 
     @Test
     void shouldPageTasks() {
-        Page<TaskBoardItemVo> pageResult = new Page<>(1, 20, 5);
-        pageResult.setRecords(SAMPLE_TASKS);
-        when(taskBoardMapper.selectPageWithOwner(any(), any()))
-                .thenReturn(pageResult);
+        List<TaskBoardItemVo> records = List.of(
+                new TaskBoardItemVo(1L, "任务1", "向下派发", "待开始", "高", "秦梓源", null, null, null),
+                new TaskBoardItemVo(2L, "任务2", "自己规划", "进行中", "中", "秦梓源", null, null, null)
+        );
+        Page<TaskBoardItemVo> pageResult = new Page<>(1, 20, 2);
+        pageResult.setRecords(records);
+        when(taskBoardMapper.selectPageWithUsers(any(), any(), any(), any(), any())).thenReturn(pageResult);
 
-        PageResponse<TaskBoardItemVo> result = service.pageTasks(new TaskQueryRequest(1, 20, null));
-
-        assertEquals(5, result.total());
-        assertEquals(1, result.page());
-        assertEquals(20, result.pageSize());
-        assertEquals(5, result.list().size());
-    }
-
-    @Test
-    void shouldPageTasksWithStatusFilter() {
-        List<TaskBoardItemVo> todoTasks = SAMPLE_TASKS.stream()
-                .filter(t -> "TODO".equals(t.status()))
-                .toList();
-        Page<TaskBoardItemVo> pageResult = new Page<>(1, 20, todoTasks.size());
-        pageResult.setRecords(todoTasks);
-        when(taskBoardMapper.selectPageWithOwner(any(), any()))
-                .thenReturn(pageResult);
-
-        PageResponse<TaskBoardItemVo> result = service.pageTasks(
-                new TaskQueryRequest(1, 20, TaskStatusConstants.TODO));
+        PageResponse<TaskBoardItemVo> result = service.pageTasks(new TaskQueryRequest(1, 20, null, null, null));
 
         assertEquals(2, result.total());
-        assertTrue(result.list().stream().allMatch(t -> "TODO".equals(t.status())));
+        assertEquals(2, result.list().size());
     }
 
     @Test
-    void shouldReturnEmptyPageForNoResults() {
+    void shouldPageTasksWithFilters() {
+        List<TaskBoardItemVo> records = List.of(
+                new TaskBoardItemVo(1L, "任务1", "向下派发", "待开始", "高", "秦梓源", null, null, null)
+        );
+        Page<TaskBoardItemVo> pageResult = new Page<>(1, 20, 1);
+        pageResult.setRecords(records);
+        when(taskBoardMapper.selectPageWithUsers(any(), any(), any(), any(), any())).thenReturn(pageResult);
+
+        PageResponse<TaskBoardItemVo> result = service.pageTasks(
+                new TaskQueryRequest(1, 20, "待开始", null, "向下派发"));
+
+        assertEquals(1, result.total());
+        assertTrue(result.list().stream().allMatch(t -> "待开始".equals(t.status())));
+    }
+
+    @Test
+    void shouldReturnEmptyPage() {
         Page<TaskBoardItemVo> pageResult = new Page<>(1, 20, 0);
         pageResult.setRecords(List.of());
-        when(taskBoardMapper.selectPageWithOwner(any(), any()))
-                .thenReturn(pageResult);
+        when(taskBoardMapper.selectPageWithUsers(any(), any(), any(), any(), any())).thenReturn(pageResult);
 
-        PageResponse<TaskBoardItemVo> result = service.pageTasks(new TaskQueryRequest(1, 20, null));
+        PageResponse<TaskBoardItemVo> result = service.pageTasks(new TaskQueryRequest(1, 20, null, null, null));
 
         assertEquals(0, result.total());
         assertTrue(result.list().isEmpty());
     }
 
     @Test
-    void shouldUseDefaultPageParamsWhenInvalid() {
-        Page<TaskBoardItemVo> pageResult = new Page<>(1, 20, 5);
-        pageResult.setRecords(SAMPLE_TASKS);
-        when(taskBoardMapper.selectPageWithOwner(any(), any()))
-                .thenReturn(pageResult);
+    void shouldUseDefaultPageParams() {
+        Page<TaskBoardItemVo> pageResult = new Page<>(1, 20, 0);
+        pageResult.setRecords(List.of());
+        when(taskBoardMapper.selectPageWithUsers(any(), any(), any(), any(), any())).thenReturn(pageResult);
 
-        service.pageTasks(new TaskQueryRequest(0, -1, null));
+        service.pageTasks(new TaskQueryRequest(0, -1, null, null, null));
 
-        verify(taskBoardMapper).selectPageWithOwner(argThat(p -> p.getCurrent() == 1 && p.getSize() == 20), any());
+        verify(taskBoardMapper).selectPageWithUsers(
+                Mockito.<Page<?>>argThat(p -> p.getCurrent() == 1 && p.getSize() == 20),
+                any(), any(), any(), any());
     }
 
     @Test
-    void shouldListBoardGroupedByStatus() {
-        when(taskBoardMapper.selectAllWithOwner())
-                .thenReturn(SAMPLE_TASKS);
+    void shouldListBoard() {
+        List<TaskBoardItemVo> tasks = List.of(
+                new TaskBoardItemVo(1L, "任务1", "向下派发", "待开始", "高", "秦梓源", null, null, null),
+                new TaskBoardItemVo(2L, "任务2", "自己规划", "进行中", "中", "秦梓源", null, null, null),
+                new TaskBoardItemVo(3L, "任务3", "向上建议", "已完成", "低", "秦梓源", null, null, null)
+        );
+        when(taskBoardMapper.selectAllWithUsers(any())).thenReturn(tasks);
 
         List<TaskBoardColumnVo> board = service.listBoard();
 
-        assertEquals(4, board.size());
-        assertEquals("TODO", board.get(0).status());
-        assertEquals("待开始", board.get(0).title());
-        assertEquals(2, board.get(0).items().size());
-        assertEquals("IN_PROGRESS", board.get(1).status());
-        assertEquals("进行中", board.get(1).title());
+        assertEquals(3, board.size());
+        assertEquals("待开始", board.get(0).status());
+        assertEquals(1, board.get(0).items().size());
+        assertEquals("进行中", board.get(1).status());
         assertEquals(1, board.get(1).items().size());
-        assertEquals("BLOCKED", board.get(2).status());
-        assertEquals("阻塞中", board.get(2).title());
+        assertEquals("已完成", board.get(2).status());
         assertEquals(1, board.get(2).items().size());
-        assertEquals("DONE", board.get(3).status());
-        assertEquals("已完成", board.get(3).title());
-        assertEquals(1, board.get(3).items().size());
     }
 
     @Test
-    void shouldListBoardWithEmptyColumnsWhenNoTasks() {
-        when(taskBoardMapper.selectAllWithOwner())
-                .thenReturn(List.of());
+    void shouldListBoardEmpty() {
+        when(taskBoardMapper.selectAllWithUsers(any())).thenReturn(List.of());
 
         List<TaskBoardColumnVo> board = service.listBoard();
 
-        assertEquals(4, board.size());
+        assertEquals(3, board.size());
         assertTrue(board.stream().allMatch(col -> col.items().isEmpty()));
     }
 
     @Test
-    void shouldCreateTaskWithDefaultValues() {
-        TaskCreateRequest request = new TaskCreateRequest(
-                "新任务", "CUSTOMER", "描述内容", null, 1L, null, null
-        );
-        when(taskBoardMapper.insert(Mockito.<TaskBoardEntity>any())).thenAnswer(invocation -> {
-            TaskBoardEntity entity = invocation.getArgument(0);
-            entity.setId(100L);
+    void shouldCreateDownwardTask() {
+        when(taskBoardMapper.insert(Mockito.<TaskBoardEntity>any())).thenAnswer(inv -> {
+            TaskBoardEntity e = inv.getArgument(0);
+            e.setId(100L);
             return 1;
         });
 
-        Long id = service.createTask(request);
+        Long id = service.createTask(new TaskCreateRequest(
+                "向下派发任务", "任务描述", "向下派发", 2L, null, "高", null));
 
         assertEquals(100L, id);
-        verify(taskBoardMapper).insert(Mockito.<TaskBoardEntity>argThat(entity ->
-                "新任务".equals(entity.getTaskTitle())
-                        && TaskStatusConstants.TODO.equals(entity.getStatus())
-                        && "MEDIUM".equals(entity.getPriority())
-                        && entity.getOwnerUserId().equals(1L)
+        verify(taskBoardMapper).insert(Mockito.<TaskBoardEntity>argThat(e ->
+                "向下派发任务".equals(e.getTaskTitle())
+                        && "向下派发".equals(e.getDirection())
+                        && e.getOwnerUserId().equals(2L)
+                        && "待开始".equals(e.getStatus())
         ));
     }
 
     @Test
-    void shouldUpdateTaskSuccessfully() {
+    void shouldCreateSelfTask() {
+        when(taskBoardMapper.insert(Mockito.<TaskBoardEntity>any())).thenAnswer(inv -> {
+            TaskBoardEntity e = inv.getArgument(0);
+            e.setId(101L);
+            return 1;
+        });
+
+        Long id = service.createTask(new TaskCreateRequest(
+                "自己规划任务", null, "自己规划", 1L, null, null, null));
+
+        assertEquals(101L, id);
+        verify(taskBoardMapper).insert(Mockito.<TaskBoardEntity>argThat(e ->
+                "自己规划任务".equals(e.getTaskTitle())
+                        && "自己规划".equals(e.getDirection())
+                        && "中".equals(e.getPriority())
+        ));
+    }
+
+    @Test
+    void shouldCreateUpwardTask() {
+        when(taskBoardMapper.insert(Mockito.<TaskBoardEntity>any())).thenAnswer(inv -> {
+            TaskBoardEntity e = inv.getArgument(0);
+            e.setId(102L);
+            return 1;
+        });
+
+        Long id = service.createTask(new TaskCreateRequest(
+                "向上建议任务", "建议内容", "向上建议", 1L, 3L, "低", null));
+
+        assertEquals(102L, id);
+        verify(taskBoardMapper).insert(Mockito.<TaskBoardEntity>argThat(e ->
+                "向上建议".equals(e.getDirection())
+                        && e.getSuggestedToUserId().equals(3L)
+        ));
+    }
+
+    @Test
+    void shouldUpdateTaskStatusWithAutoLog() {
         TaskBoardEntity existing = new TaskBoardEntity();
-        existing.setId(301L);
-        existing.setTaskTitle("旧标题");
-        existing.setStatus("TODO");
-        existing.setPriority("LOW");
-        existing.setOwnerUserId(1L);
-
-        when(taskBoardMapper.selectById(301L)).thenReturn(existing);
+        existing.setId(1L);
+        existing.setStatus("待开始");
+        when(taskBoardMapper.selectById(1L)).thenReturn(existing);
         when(taskBoardMapper.updateById(Mockito.<TaskBoardEntity>any())).thenReturn(1);
+        when(taskLogMapper.insert(Mockito.<TaskLogEntity>any())).thenReturn(1);
 
-        TaskUpdateRequest request = new TaskUpdateRequest(
-                "新标题", "IN_PROGRESS", "新描述", "HIGH", 2L, 3L,
-                LocalDateTime.of(2026, 5, 25, 12, 0), "下一步"
-        );
-        service.updateTask(301L, request);
+        service.updateTaskStatus(1L, new TaskStatusUpdateRequest("进行中"));
 
-        verify(taskBoardMapper).updateById(Mockito.<TaskBoardEntity>argThat(entity ->
-                "新标题".equals(entity.getTaskTitle())
-                        && "IN_PROGRESS".equals(entity.getStatus())
-                        && "HIGH".equals(entity.getPriority())
-                        && entity.getOwnerUserId().equals(2L)
-                        && entity.getAssistantUserId().equals(3L)
-                        && "下一步".equals(entity.getNextAction())
+        assertEquals("进行中", existing.getStatus());
+        verify(taskBoardMapper).updateById(Mockito.<TaskBoardEntity>any());
+        verify(taskLogMapper).insert(Mockito.<TaskLogEntity>argThat(log ->
+                "状态变更".equals(log.getType())
+                        && "待开始".equals(log.getFromStatus())
+                        && "进行中".equals(log.getToStatus())
         ));
     }
 
     @Test
-    void shouldThrowNotFoundWhenUpdateMissingTask() {
+    void shouldAddManualLog() {
+        TaskBoardEntity existing = new TaskBoardEntity();
+        existing.setId(1L);
+        when(taskBoardMapper.selectById(1L)).thenReturn(existing);
+        when(taskLogMapper.insert(Mockito.<TaskLogEntity>any())).thenReturn(1);
+
+        service.addTaskLog(1L, new TaskLogCreateRequest("备注", "添加了一条备注"));
+
+        verify(taskLogMapper).insert(Mockito.<TaskLogEntity>argThat(log ->
+                "备注".equals(log.getType())
+                        && "添加了一条备注".equals(log.getContent())
+                        && log.getUserId().equals(1L)
+        ));
+    }
+
+    @Test
+    void shouldGetTaskDetailWithLogs() {
+        TaskDetailVo detail = new TaskDetailVo(1L, "任务标题", "任务描述", "自己规划", "待开始", "高",
+                "秦梓源", "秦梓源", null, null, 1L, 1L, null);
+        when(taskBoardMapper.selectDetailById(1L)).thenReturn(detail);
+        when(taskLogMapper.selectByTaskId(1L)).thenReturn(List.of(
+                new TaskLogVo(1L, 1L, 1L, "秦梓源", "状态变更", null, "待开始", "进行中", LocalDateTime.now())
+        ));
+
+        TaskDetailWithLogsVo result = service.getTask(1L);
+
+        assertNotNull(result);
+        assertEquals("任务标题", result.task().taskTitle());
+        assertEquals(1, result.logs().size());
+    }
+
+    @Test
+    void shouldThrowNotFoundForMissingTask() {
         when(taskBoardMapper.selectById(999L)).thenReturn(null);
 
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> service.updateTask(999L, new TaskUpdateRequest(
-                        "标题", "TODO", null, null, 1L, null, null, null
-                )));
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> service.updateTaskStatus(999L, new TaskStatusUpdateRequest("进行中")));
+        assertEquals(ErrorCodeConstants.NOT_FOUND, ex.getCode());
+    }
 
-        assertEquals(ErrorCodeConstants.NOT_FOUND, exception.getCode());
-        assertTrue(exception.getMessage().contains("task not found"));
+    @Test
+    void shouldThrowNotFoundForMissingTaskDetail() {
+        when(taskBoardMapper.selectDetailById(999L)).thenReturn(null);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> service.getTask(999L));
+        assertEquals(ErrorCodeConstants.NOT_FOUND, ex.getCode());
     }
 }

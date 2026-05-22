@@ -60,16 +60,11 @@ class DashboardAggregationTest {
         ), 1, 1000, 4));
 
         when(taskBoardService.pageTasks(any(TaskQueryRequest.class))).thenReturn(PageResponse.of(List.of(
-                new TaskBoardItemVo(301L, "整理高意向客户回访清单", "CUSTOMER", "IN_PROGRESS", "HIGH", "秦梓源", "志明",
-                        LocalDateTime.of(2026, 5, 19, 20, 0), "今晚补齐名单"),
-                new TaskBoardItemVo(302L, "补齐日报模板字段说明", "REPORT", "TODO", "MEDIUM", "志明", null,
-                        LocalDateTime.of(2026, 5, 19, 22, 0), "写完后发群确认"),
-                new TaskBoardItemVo(303L, "整理话术库首版分类", "SCRIPT", "DONE", "MEDIUM", "哲涛", "许润",
-                        LocalDateTime.of(2026, 5, 17, 18, 0), "已进入评审"),
-                new TaskBoardItemVo(304L, "确认小镇Coders海报文案", "GROUP", "TODO", "HIGH", "嘉诚", "许润",
-                        LocalDateTime.of(2026, 5, 18, 16, 0), "等设计稿"),
-                new TaskBoardItemVo(305L, "联调首页看板字段", "DASHBOARD", "BLOCKED", "HIGH", "秦梓源", "嘉诚",
-                        null, "等后端接口真实化")
+                new TaskBoardItemVo(301L, "整理高意向客户回访清单", "CUSTOMER", "IN_PROGRESS", "HIGH", "秦梓源", "志明", null, LocalDateTime.of(2026, 5, 19, 20, 0)),
+                new TaskBoardItemVo(302L, "补齐日报模板字段说明", "REPORT", "TODO", "MEDIUM", "志明", null, null, LocalDateTime.of(2026, 5, 19, 22, 0)),
+                new TaskBoardItemVo(303L, "整理话术库首版分类", "SCRIPT", "DONE", "MEDIUM", "哲涛", "许润", null, LocalDateTime.of(2026, 5, 17, 18, 0)),
+                new TaskBoardItemVo(304L, "确认小镇Coders海报文案", "GROUP", "TODO", "HIGH", "嘉诚", "许润", null, LocalDateTime.of(2026, 5, 18, 16, 0)),
+                new TaskBoardItemVo(305L, "联调首页看板字段", "DASHBOARD", "BLOCKED", "HIGH", "秦梓源", "嘉诚", null, null)
         ), 1, 1000, 5));
 
         DashboardServiceImpl dashboardService = new DashboardServiceImpl(

@@ -79,7 +79,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private List<TaskBoardItemVo> fetchTasks() {
-        return taskBoardService.pageTasks(new TaskQueryRequest(1, DASHBOARD_FETCH_SIZE, null)).list();
+        return taskBoardService.pageTasks(new TaskQueryRequest(1, DASHBOARD_FETCH_SIZE, null, null, null)).list();
     }
 
     private int countTodayPendingFollows(List<CustomerListItemVo> customers, List<FollowUpVo> followUps, LocalDate today) {

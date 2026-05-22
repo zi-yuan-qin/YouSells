@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yousells.modules.report.mapper.ReportAggregationMapper">
+    <select id="countNewCustomers" resultType="int">
+        SELECT COUNT(*) FROM customers WHERE is_deleted = 0
+        AND created_at BETWEEN #{start} AND #{end}
+        AND (inviter_user_id = #{userId} OR owner_user_id = #{userId})
+    </select>
+    <select id="countFollowUps" resultType="int">
+        SELECT COUNT(*) FROM customer_follow_ups WHERE is_deleted = 0
+        AND created_at BETWEEN #{start} AND #{end} AND user_id = #{userId}
+    </select>
+    <select id="countCompletedTasks" resultType="int">
+        SELECT COUNT(*) FROM task_boards WHERE is_deleted = 0
+        AND status = '已完成' AND updated_at BETWEEN #{start} AND #{end}
+        AND owner_user_id = #{userId}
+    </select>
+    <select id="countConvertedCustomers" resultType="int">
+        SELECT COUNT(*) FROM customers WHERE is_deleted = 0
+        AND progress = '课程' AND intent = '很稳'
+        AND updated_at BETWEEN #{start} AND #{end}
+        AND (inviter_user_id = #{userId} OR owner_user_id = #{userId})
+    </select>
+</mapper>

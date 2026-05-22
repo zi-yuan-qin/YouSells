@@ -9,12 +9,9 @@ import com.yousells.modules.report.service.ReportService;
 import com.yousells.modules.report.vo.DailyReportVo;
 import com.yousells.modules.report.vo.WeeklyReportVo;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -27,7 +24,12 @@ public class ReportController {
     }
 
     @GetMapping("/daily")
-    public ApiResponse<PageResponse<DailyReportVo>> daily(
+    public ApiResponse<DailyReportVo> daily(@RequestParam LocalDate date) {
+        return ApiResponse.success(reportService.getDailyReport(date));
+    }
+
+    @GetMapping("/daily/history")
+    public ApiResponse<PageResponse<DailyReportVo>> dailyHistory(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         return ApiResponse.success(reportService.pageDailyReports(page, pageSize));
@@ -38,8 +40,20 @@ public class ReportController {
         return ApiResponse.success(new IdResponse(reportService.createDailyReport(request)));
     }
 
+    @PutMapping("/daily/{id}")
+    public ApiResponse<Void> updateDaily(@PathVariable Long id,
+                                          @Valid @RequestBody DailyReportCreateRequest request) {
+        reportService.updateDailyReport(id, request);
+        return ApiResponse.success();
+    }
+
     @GetMapping("/weekly")
-    public ApiResponse<PageResponse<WeeklyReportVo>> weekly(
+    public ApiResponse<WeeklyReportVo> weekly(@RequestParam String week) {
+        return ApiResponse.success(reportService.getWeeklyReport(week));
+    }
+
+    @GetMapping("/weekly/history")
+    public ApiResponse<PageResponse<WeeklyReportVo>> weeklyHistory(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         return ApiResponse.success(reportService.pageWeeklyReports(page, pageSize));
@@ -48,5 +62,12 @@ public class ReportController {
     @PostMapping("/weekly")
     public ApiResponse<IdResponse> createWeekly(@Valid @RequestBody WeeklyReportCreateRequest request) {
         return ApiResponse.success(new IdResponse(reportService.createWeeklyReport(request)));
+    }
+
+    @PutMapping("/weekly/{id}")
+    public ApiResponse<Void> updateWeekly(@PathVariable Long id,
+                                           @Valid @RequestBody WeeklyReportCreateRequest request) {
+        reportService.updateWeeklyReport(id, request);
+        return ApiResponse.success();
     }
 }

@@ -41,7 +41,7 @@ class FollowUpServiceTest {
 
     @BeforeEach
     void setUp() {
-        LoginUser loginUser = new LoginUser(1L, "admin", "管理员", List.of("ADMIN"));
+        LoginUser loginUser = new LoginUser(1L, "admin", "管理员", "T2", null);
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(loginUser, null, List.of()));
 

@@ -2,28 +2,72 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yousells.modules.report.mapper.DailyReportMapper">
 
-    <resultMap id="DailyReportVoMap" type="com.yousells.modules.report.vo.DailyReportVo">
-        <constructor>
-            <idArg column="id" javaType="java.lang.Long"/>
-            <arg column="report_date" javaType="java.time.LocalDate"/>
-            <arg column="user_name" javaType="java.lang.String"/>
-            <arg column="today_work" javaType="java.lang.String"/>
-            <arg column="issues" javaType="java.lang.String"/>
-            <arg column="tomorrow_plan" javaType="java.lang.String"/>
-        </constructor>
-    </resultMap>
+    <select id="selectPageWithUser" resultType="com.yousells.modules.report.vo.DailyReportVo">
+        SELECT dr.id,
+               dr.report_date       AS reportDate,
+               dr.user_id           AS userId,
+               u.real_name          AS userRealName,
+               dr.new_customer_count    AS newCustomerCount,
+               dr.follow_up_count       AS followUpCount,
+               dr.progress_advance_count AS progressAdvanceCount,
+               dr.task_completed_count  AS taskCompletedCount,
+               dr.progress_details      AS progressDetails,
+               dr.task_completed_details AS taskCompletedDetails,
+               dr.summary,
+               dr.issues,
+               dr.tomorrow_plan      AS tomorrowPlan
+        FROM daily_reports dr
+                 LEFT JOIN users u ON dr.user_id = u.id AND u.is_deleted = 0
+        WHERE dr.is_deleted = 0
+        <if test="visibleUserIds != null and visibleUserIds.size() > 0">
+            AND dr.user_id IN
+            <foreach collection="visibleUserIds" item="uid" open="(" separator="," close=")">
+                #{uid}
+            </foreach>
+        </if>
+        ORDER BY dr.report_date DESC, dr.id DESC
+    </select>
 
-    <select id="selectPageWithUser" resultMap="DailyReportVoMap">
-        SELECT d.id,
-               d.report_date,
-               u.display_name AS user_name,
-               d.today_work,
-               d.issues,
-               d.tomorrow_plan
-        FROM daily_reports d
-        LEFT JOIN users u ON d.user_id = u.id
-        WHERE d.is_deleted = 0
-        ORDER BY d.report_date DESC, d.id DESC
+    <select id="selectByDateAndUser" resultType="com.yousells.modules.report.vo.DailyReportVo">
+        SELECT dr.id,
+               dr.report_date       AS reportDate,
+               dr.user_id           AS userId,
+               u.real_name          AS userRealName,
+               dr.new_customer_count    AS newCustomerCount,
+               dr.follow_up_count       AS followUpCount,
+               dr.progress_advance_count AS progressAdvanceCount,
+               dr.task_completed_count  AS taskCompletedCount,
+               dr.progress_details      AS progressDetails,
+               dr.task_completed_details AS taskCompletedDetails,
+               dr.summary,
+               dr.issues,
+               dr.tomorrow_plan      AS tomorrowPlan
+        FROM daily_reports dr
+                 LEFT JOIN users u ON dr.user_id = u.id AND u.is_deleted = 0
+        WHERE dr.is_deleted = 0
+          AND dr.report_date = #{date}
+          AND dr.user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <select id="selectByIdWithUser" resultType="com.yousells.modules.report.vo.DailyReportVo">
+        SELECT dr.id,
+               dr.report_date       AS reportDate,
+               dr.user_id           AS userId,
+               u.real_name          AS userRealName,
+               dr.new_customer_count    AS newCustomerCount,
+               dr.follow_up_count       AS followUpCount,
+               dr.progress_advance_count AS progressAdvanceCount,
+               dr.task_completed_count  AS taskCompletedCount,
+               dr.progress_details      AS progressDetails,
+               dr.task_completed_details AS taskCompletedDetails,
+               dr.summary,
+               dr.issues,
+               dr.tomorrow_plan      AS tomorrowPlan
+        FROM daily_reports dr
+                 LEFT JOIN users u ON dr.user_id = u.id AND u.is_deleted = 0
+        WHERE dr.is_deleted = 0
+          AND dr.id = #{id}
     </select>
 
 </mapper>

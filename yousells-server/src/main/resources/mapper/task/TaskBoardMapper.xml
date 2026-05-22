@@ -2,47 +2,83 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yousells.modules.task.mapper.TaskBoardMapper">
 
-    <resultMap id="TaskBoardItemVoMap" type="com.yousells.modules.task.vo.TaskBoardItemVo">
-        <constructor>
-            <idArg column="id" javaType="java.lang.Long"/>
-            <arg column="task_title" javaType="java.lang.String"/>
-            <arg column="task_type" javaType="java.lang.String"/>
-            <arg column="status" javaType="java.lang.String"/>
-            <arg column="priority" javaType="java.lang.String"/>
-            <arg column="owner_name" javaType="java.lang.String"/>
-            <arg column="assistant_name" javaType="java.lang.String"/>
-            <arg column="due_at" javaType="java.time.LocalDateTime"/>
-            <arg column="next_action" javaType="java.lang.String"/>
-        </constructor>
-    </resultMap>
-
-    <sql id="selectWithOwner">
+    <select id="selectPageWithUsers" resultType="com.yousells.modules.task.vo.TaskBoardItemVo">
         SELECT t.id,
-               t.task_title,
-               t.task_type,
+               t.task_title          AS taskTitle,
+               t.direction,
                t.status,
                t.priority,
-               u1.display_name AS owner_name,
-               u2.display_name AS assistant_name,
-               t.due_at,
-               t.next_action
+               uo.real_name          AS ownerDisplayName,
+               uc.real_name          AS creatorDisplayName,
+               us.real_name          AS suggestedToDisplayName,
+               t.due_at              AS dueAt
         FROM task_boards t
-        LEFT JOIN users u1 ON t.owner_user_id = u1.id
-        LEFT JOIN users u2 ON t.assistant_user_id = u2.id
+                 LEFT JOIN users uo ON t.owner_user_id = uo.id AND uo.is_deleted = 0
+                 LEFT JOIN users uc ON t.creator_user_id = uc.id AND uc.is_deleted = 0
+                 LEFT JOIN users us ON t.suggested_to_user_id = us.id AND us.is_deleted = 0
         WHERE t.is_deleted = 0
-    </sql>
-
-    <select id="selectPageWithOwner" resultMap="TaskBoardItemVoMap">
-        <include refid="selectWithOwner"/>
         <if test="status != null and status != ''">
             AND t.status = #{status}
+        </if>
+        <if test="ownerUserId != null">
+            AND t.owner_user_id = #{ownerUserId}
+        </if>
+        <if test="direction != null and direction != ''">
+            AND t.direction = #{direction}
+        </if>
+        <if test="visibleOwnerIds != null and visibleOwnerIds.size() > 0">
+            AND t.owner_user_id IN
+            <foreach collection="visibleOwnerIds" item="uid" open="(" separator="," close=")">
+                #{uid}
+            </foreach>
         </if>
         ORDER BY t.due_at ASC, t.id DESC
     </select>
 
-    <select id="selectAllWithOwner" resultMap="TaskBoardItemVoMap">
-        <include refid="selectWithOwner"/>
+    <select id="selectAllWithUsers" resultType="com.yousells.modules.task.vo.TaskBoardItemVo">
+        SELECT t.id,
+               t.task_title          AS taskTitle,
+               t.direction,
+               t.status,
+               t.priority,
+               uo.real_name          AS ownerDisplayName,
+               uc.real_name          AS creatorDisplayName,
+               us.real_name          AS suggestedToDisplayName,
+               t.due_at              AS dueAt
+        FROM task_boards t
+                 LEFT JOIN users uo ON t.owner_user_id = uo.id AND uo.is_deleted = 0
+                 LEFT JOIN users uc ON t.creator_user_id = uc.id AND uc.is_deleted = 0
+                 LEFT JOIN users us ON t.suggested_to_user_id = us.id AND us.is_deleted = 0
+        WHERE t.is_deleted = 0
+        <if test="visibleOwnerIds != null and visibleOwnerIds.size() > 0">
+            AND t.owner_user_id IN
+            <foreach collection="visibleOwnerIds" item="uid" open="(" separator="," close=")">
+                #{uid}
+            </foreach>
+        </if>
         ORDER BY t.due_at ASC, t.id DESC
+    </select>
+
+    <select id="selectDetailById" resultType="com.yousells.modules.task.vo.TaskDetailVo">
+        SELECT t.id,
+               t.task_title            AS taskTitle,
+               t.task_description      AS taskDescription,
+               t.direction,
+               t.status,
+               t.priority,
+               uo.real_name            AS ownerDisplayName,
+               uc.real_name            AS creatorDisplayName,
+               us.real_name            AS suggestedToDisplayName,
+               t.due_at                AS dueAt,
+               t.owner_user_id         AS ownerUserId,
+               t.creator_user_id       AS creatorUserId,
+               t.suggested_to_user_id  AS suggestedToUserId
+        FROM task_boards t
+                 LEFT JOIN users uo ON t.owner_user_id = uo.id AND uo.is_deleted = 0
+                 LEFT JOIN users uc ON t.creator_user_id = uc.id AND uc.is_deleted = 0
+                 LEFT JOIN users us ON t.suggested_to_user_id = us.id AND us.is_deleted = 0
+        WHERE t.is_deleted = 0
+          AND t.id = #{id}
     </select>
 
 </mapper>

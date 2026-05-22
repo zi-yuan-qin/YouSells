@@ -2,28 +2,84 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yousells.modules.report.mapper.WeeklyReportMapper">
 
-    <resultMap id="WeeklyReportVoMap" type="com.yousells.modules.report.vo.WeeklyReportVo">
-        <constructor>
-            <idArg column="id" javaType="java.lang.Long"/>
-            <arg column="week_key" javaType="java.lang.String"/>
-            <arg column="user_name" javaType="java.lang.String"/>
-            <arg column="weekly_summary" javaType="java.lang.String"/>
-            <arg column="issues" javaType="java.lang.String"/>
-            <arg column="next_week_plan" javaType="java.lang.String"/>
-        </constructor>
-    </resultMap>
+    <select id="selectPageWithUser" resultType="com.yousells.modules.report.vo.WeeklyReportVo">
+        SELECT wr.id,
+               wr.week_key            AS weekKey,
+               wr.user_id             AS userId,
+               u.real_name            AS userRealName,
+               wr.week_start          AS weekStart,
+               wr.week_end            AS weekEnd,
+               wr.new_customer_count      AS newCustomerCount,
+               wr.follow_up_count         AS followUpCount,
+               wr.progress_advance_count  AS progressAdvanceCount,
+               wr.converted_count         AS convertedCount,
+               wr.task_completed_count    AS taskCompletedCount,
+               wr.progress_details        AS progressDetails,
+               wr.converted_details       AS convertedDetails,
+               wr.task_completed_details  AS taskCompletedDetails,
+               wr.summary,
+               wr.issues,
+               wr.next_week_plan      AS nextWeekPlan
+        FROM weekly_reports wr
+                 LEFT JOIN users u ON wr.user_id = u.id AND u.is_deleted = 0
+        WHERE wr.is_deleted = 0
+        <if test="visibleUserIds != null and visibleUserIds.size() > 0">
+            AND wr.user_id IN
+            <foreach collection="visibleUserIds" item="uid" open="(" separator="," close=")">
+                #{uid}
+            </foreach>
+        </if>
+        ORDER BY wr.week_key DESC, wr.id DESC
+    </select>
 
-    <select id="selectPageWithUser" resultMap="WeeklyReportVoMap">
-        SELECT w.id,
-               w.week_key,
-               u.display_name AS user_name,
-               w.weekly_summary,
-               w.issues,
-               w.next_week_plan
-        FROM weekly_reports w
-        LEFT JOIN users u ON w.user_id = u.id
-        WHERE w.is_deleted = 0
-        ORDER BY w.week_key DESC, w.id DESC
+    <select id="selectByWeekAndUser" resultType="com.yousells.modules.report.vo.WeeklyReportVo">
+        SELECT wr.id,
+               wr.week_key            AS weekKey,
+               wr.user_id             AS userId,
+               u.real_name            AS userRealName,
+               wr.week_start          AS weekStart,
+               wr.week_end            AS weekEnd,
+               wr.new_customer_count      AS newCustomerCount,
+               wr.follow_up_count         AS followUpCount,
+               wr.progress_advance_count  AS progressAdvanceCount,
+               wr.converted_count         AS convertedCount,
+               wr.task_completed_count    AS taskCompletedCount,
+               wr.progress_details        AS progressDetails,
+               wr.converted_details       AS convertedDetails,
+               wr.task_completed_details  AS taskCompletedDetails,
+               wr.summary,
+               wr.issues,
+               wr.next_week_plan      AS nextWeekPlan
+        FROM weekly_reports wr
+                 LEFT JOIN users u ON wr.user_id = u.id AND u.is_deleted = 0
+        WHERE wr.is_deleted = 0
+          AND wr.week_key = #{weekKey}
+          AND wr.user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <select id="selectByIdWithUser" resultType="com.yousells.modules.report.vo.WeeklyReportVo">
+        SELECT wr.id,
+               wr.week_key            AS weekKey,
+               wr.user_id             AS userId,
+               u.real_name            AS userRealName,
+               wr.week_start          AS weekStart,
+               wr.week_end            AS weekEnd,
+               wr.new_customer_count      AS newCustomerCount,
+               wr.follow_up_count         AS followUpCount,
+               wr.progress_advance_count  AS progressAdvanceCount,
+               wr.converted_count         AS convertedCount,
+               wr.task_completed_count    AS taskCompletedCount,
+               wr.progress_details        AS progressDetails,
+               wr.converted_details       AS convertedDetails,
+               wr.task_completed_details  AS taskCompletedDetails,
+               wr.summary,
+               wr.issues,
+               wr.next_week_plan      AS nextWeekPlan
+        FROM weekly_reports wr
+                 LEFT JOIN users u ON wr.user_id = u.id AND u.is_deleted = 0
+        WHERE wr.is_deleted = 0
+          AND wr.id = #{id}
     </select>
 
 </mapper>
