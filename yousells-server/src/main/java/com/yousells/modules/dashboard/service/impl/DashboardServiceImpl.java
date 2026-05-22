@@ -7,9 +7,6 @@ import com.yousells.modules.dashboard.service.DashboardService;
 import com.yousells.modules.dashboard.vo.DashboardCustomerReminderVo;
 import com.yousells.modules.dashboard.vo.DashboardOverviewVo;
 import com.yousells.modules.dashboard.vo.DashboardTaskReminderVo;
-import com.yousells.modules.followup.dto.FollowUpQueryRequest;
-import com.yousells.modules.followup.service.FollowUpService;
-import com.yousells.modules.followup.vo.FollowUpVo;
 import com.yousells.modules.task.dto.TaskQueryRequest;
 import com.yousells.modules.task.service.TaskBoardService;
 import com.yousells.modules.task.vo.TaskBoardItemVo;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -30,16 +26,13 @@ public class DashboardServiceImpl implements DashboardService {
     private static final int RECENT_CUSTOMER_DAYS = 7;
 
     private final CustomerService customerService;
-    private final FollowUpService followUpService;
     private final TaskBoardService taskBoardService;
     private final Clock clock;
 
     public DashboardServiceImpl(CustomerService customerService,
-                                FollowUpService followUpService,
                                 TaskBoardService taskBoardService,
                                 Clock clock) {
         this.customerService = customerService;
-        this.followUpService = followUpService;
         this.taskBoardService = taskBoardService;
         this.clock = clock;
     }
@@ -70,10 +63,14 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private int countTodayPendingFollows(List<CustomerListItemVo> customers) {
-        return (int) customers.stream().count();
+        // P1: 待跟进 = 职规/技术栈阶段的活跃客户（BE-107 收口后通过跟进记录精确计算）
+        return (int) customers.stream()
+                .filter(c -> !"课程".equals(c.progress()))
+                .count();
     }
 
     private int countOverdueCustomers(List<CustomerListItemVo> customers) {
+        // P1: 待 BE-104 任务日志就绪后通过跟进记录 lastAction 精确计算
         return 0;
     }
 

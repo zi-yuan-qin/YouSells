@@ -42,11 +42,11 @@ class DashboardAggregationTest {
         when(taskBoardService.pageTasks(any(TaskQueryRequest.class))).thenReturn(PageResponse.of(List.of(), 1, 1000, 0));
 
         DashboardServiceImpl dashboardService = new DashboardServiceImpl(
-                customerService, null, taskBoardService, fixedClock);
+                customerService, taskBoardService, fixedClock);
 
         DashboardOverviewVo overview = dashboardService.getOverview();
 
-        assertEquals(3, overview.todayPendingFollowCount());
+        assertEquals(2, overview.todayPendingFollowCount());
         assertEquals(0, overview.overdueCustomerCount());
         assertEquals(3, overview.recentNewCustomerCount());
         assertEquals(2, overview.highIntentCustomerCount());
