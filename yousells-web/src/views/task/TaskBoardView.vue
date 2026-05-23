@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import TaskBoardToolbar from "@/components/task/TaskBoardToolbar.vue";
 import TaskBoardColumn from "@/components/task/TaskBoardColumn.vue";
 import TaskEditDialog from "@/components/task/TaskEditDialog.vue";
@@ -87,7 +88,7 @@ onMounted(() => {
         />
       </div>
 
-      <el-empty v-if="!loading && columns.length === 0" description="暂无任务数据" />
+      <EmptyState v-if="!loading && columns.length === 0" title="暂无任务" description="看板空空如也，点击上方按钮创建第一个任务" />
     </PageSection>
 
     <TaskEditDialog

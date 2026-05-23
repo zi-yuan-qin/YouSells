@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import type { FollowUpRecord } from "@/types/followup";
 import { datetime } from "@/utils/format";
 
@@ -40,7 +41,7 @@ const sortedItems = computed(() =>
 <template>
   <div class="followup-timeline" v-loading="loading">
     <div v-if="followUps.length === 0 && !loading" class="followup-timeline__empty">
-      <el-empty description="暂无跟进记录" />
+      <EmptyState title="暂无跟进记录" description="该客户还没有跟进记录，点击上方按钮添加第一条跟进" />
     </div>
 
     <div v-else class="timeline">

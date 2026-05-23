@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Download, RefreshRight } from "@element-plus/icons-vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import type { CustomerListItem } from "@/types/customer-list";
 
 defineProps<{
@@ -41,7 +42,7 @@ function progressTagType(progress: string): "success" | "warning" | "info" {
       @row-click="(row: CustomerListItem) => emit('row-click', row)"
     >
       <template #empty>
-        <el-empty description="暂无客户数据" />
+        <EmptyState title="暂无客户" description="当前筛选条件下没有找到客户，试试调整筛选条件或新建一个客户" />
       </template>
       <el-table-column prop="realName" label="姓名" width="100" />
       <el-table-column prop="grade" label="年级" width="80">

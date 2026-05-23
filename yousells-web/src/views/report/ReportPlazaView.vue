@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import ReportPlazaCard from "@/components/report/ReportPlazaCard.vue";
 import { fetchReportPlaza } from "@/api/report";
 import { fetchUserList } from "@/api/user";
@@ -110,7 +111,7 @@ onMounted(() => {
           @comment-added="handleCommentAdded"
         />
 
-        <el-empty v-if="!loading && reports.length === 0" description="暂无报告" />
+        <EmptyState v-if="!loading && reports.length === 0" title="暂无报告" description="还没有人提交日报或周报，来做第一个提交的人吧" />
       </div>
 
       <el-pagination

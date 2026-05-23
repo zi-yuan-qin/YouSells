@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { ArrowLeft } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import { stageLabel, followTypeLabel } from "@/constants/stage";
 import { friendlyDate, datetime } from "@/utils/format";
 import CustomerProfileCard from "@/components/customer-detail/CustomerProfileCard.vue";
@@ -107,7 +108,7 @@ watch(() => route.params.id, (newId, oldId) => {
         </div>
       </div>
 
-      <el-empty v-else-if="!loading" description="未找到客户信息" />
+      <EmptyState v-else-if="!loading" title="客户不存在" description="该客户可能已被删除或 ID 有误" />
 
       <div v-if="detail">
         <div class="followup-section-header">

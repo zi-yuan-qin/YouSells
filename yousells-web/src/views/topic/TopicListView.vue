@@ -3,6 +3,7 @@ import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import TopicFilterBar from "@/components/topic/TopicFilterBar.vue";
 import TopicCard from "@/components/topic/TopicCard.vue";
 import TopicCreateDialog from "@/components/topic/TopicCreateDialog.vue";
@@ -100,7 +101,7 @@ onMounted(() => {
       </div>
 
       <div v-else-if="topics.length === 0 && !loading">
-        <el-empty description="暂无问题" />
+        <EmptyState title="暂无问题" description="攻略区空空如也，来发起第一个讨论吧" action-text="发起提问" @action="$router.push({ name: 'topic-create' })" />
       </div>
 
       <div v-else class="topic-list">

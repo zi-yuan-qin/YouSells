@@ -10,6 +10,7 @@ import { RouteName } from "@/router/route-names";
 import { useAuthStore } from "@/stores/auth";
 import { AUTH_UNAUTHORIZED_EVENT } from "@/utils/auth-token";
 import "./styles/base.css";
+import "./styles/animations.css";
 
 // Initialize theme before rendering
 const savedTheme = localStorage.getItem("yousells-theme");

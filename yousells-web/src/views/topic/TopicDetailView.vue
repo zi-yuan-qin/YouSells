@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import TopicReplyList from "@/components/topic/TopicReplyList.vue";
 import TopicReplyForm from "@/components/topic/TopicReplyForm.vue";
 import { fetchTopicDetail, createReply, markSolved, markSolution } from "@/api/topic";
@@ -119,7 +120,7 @@ onMounted(() => {
       <div v-if="loading" v-loading="true" style="min-height: 200px" />
 
       <div v-else-if="notFound" class="detail-error">
-        <el-empty description="问题不存在或已删除" />
+        <EmptyState title="内容不存在" description="该问题可能已被删除或链接有误" />
         <el-button type="primary" @click="goBack">返回攻略区</el-button>
       </div>
 
