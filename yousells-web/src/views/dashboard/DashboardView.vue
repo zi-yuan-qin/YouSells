@@ -169,56 +169,46 @@ async function updateCharts() {
       });
     }
 
-    // Update radar chart (intent distribution)
+    // Update donut chart (intent distribution)
     if (pieChartRef.value && overview.value && overview.value.intentDistribution?.length > 0) {
       if (!pieChartInstance) {
         pieChartInstance = echarts.init(pieChartRef.value);
       }
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       const textColor = isDark ? "#94a3b8" : "#64748b";
-      const intentDist = overview.value.intentDistribution;
-      const maxValue = Math.max(...intentDist.map(d => d.count)) * 1.2 || 10;
       pieChartInstance.setOption({
         tooltip: {
           trigger: "item",
+          formatter: "{b}: {c} ({d}%)",
           backgroundColor: isDark ? "#1e293b" : "#fff",
           borderColor: isDark ? "#334155" : "#e2e8f0",
           textStyle: { color: isDark ? "#f1f5f9" : "#1e293b" }
         },
-        radar: {
-          indicator: overview.value.intentDistribution.map(d => ({
-            name: d.intent,
-            max: maxValue
-          })),
-          radius: "65%",
-          center: ["50%", "50%"],
-          axisName: {
-            color: textColor,
-            fontSize: 11
-          },
-          splitArea: {
-            areaStyle: {
-              color: isDark
-                ? ["rgba(51, 65, 85, 0.3)", "rgba(51, 65, 85, 0.15)", "rgba(51, 65, 85, 0.3)"]
-                : ["rgba(241, 245, 249, 0.6)", "rgba(241, 245, 249, 0.3)", "rgba(241, 245, 249, 0.6)"]
-            }
-          },
-          axisLine: { lineStyle: { color: isDark ? "#334155" : "#e2e8f0" } },
-          splitLine: { lineStyle: { color: isDark ? "#334155" : "#e2e8f0" } }
+        legend: {
+          bottom: "0%",
+          left: "center",
+          itemWidth: 10,
+          itemHeight: 10,
+          textStyle: { color: textColor, fontSize: 11 }
         },
         series: [{
-          type: "radar",
-          symbol: "circle",
-          symbolSize: 6,
-          lineStyle: { width: 2, color: isDark ? "#60a5fa" : "#2563eb" },
-          itemStyle: { color: isDark ? "#60a5fa" : "#2563eb" },
-          areaStyle: {
-            color: isDark ? "rgba(96, 165, 250, 0.25)" : "rgba(37, 99, 235, 0.15)"
+          type: "pie",
+          radius: ["40%", "70%"],
+          center: ["50%", "45%"],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 4,
+            borderColor: isDark ? "#1e293b" : "#fff",
+            borderWidth: 2
           },
-          data: [{
-            value: overview.value.intentDistribution.map(d => d.count),
-            name: "客户意向分布"
-          }]
+          label: { show: false },
+          emphasis: {
+            label: { show: true, fontSize: 14, fontWeight: "bold" }
+          },
+          data: overview.value.intentDistribution.map(d => ({ name: d.intent, value: d.count })),
+          color: isDark
+            ? ["#60a5fa", "#34d399", "#fbbf24", "#f87171"]
+            : ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"]
         }]
       }, true);
     }
