@@ -80,15 +80,15 @@ const priorityTypeMap: Record<string, "danger" | "warning" | "info" | ""> = {
 <style scoped>
 .task-card {
   padding: 14px;
-  background: #ffffff;
+  background: var(--color-bg-surface);
   border-radius: 14px;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--color-border);
   cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .task-card:hover {
-  box-shadow: 0 4px 16px rgba(20, 32, 61, 0.08);
+  box-shadow: var(--shadow-elevated);
   transform: translateY(-1px);
 }
 
@@ -111,7 +111,7 @@ const priorityTypeMap: Record<string, "danger" | "warning" | "info" | ""> = {
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .task-card__due {
@@ -119,17 +119,17 @@ const priorityTypeMap: Record<string, "danger" | "warning" | "info" | ""> = {
 }
 
 .task-card__due--overdue {
-  color: #e53e3e;
+  color: var(--color-danger);
   font-weight: 600;
 }
 
 .task-card__more {
-  color: #94a3b8;
+  color: var(--color-text-muted);
   cursor: pointer;
   font-size: 14px;
 }
 
 .task-card__more:hover {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 </style>

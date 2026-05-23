@@ -59,7 +59,7 @@ function onDrop(e: DragEvent) {
 <style scoped>
 .board-column {
   min-height: 200px;
-  background: #f8fbff;
+  background: var(--color-bg-card);
   border-radius: 18px;
   padding: 16px;
   display: flex;
@@ -76,7 +76,7 @@ function onDrop(e: DragEvent) {
 .board-column__title {
   font-weight: 700;
   font-size: 15px;
-  color: #12213d;
+  color: var(--color-text-primary);
 }
 
 .board-column__body {
@@ -88,7 +88,7 @@ function onDrop(e: DragEvent) {
 
 .board-column__empty {
   text-align: center;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-size: 13px;
   padding: 24px 0;
 }

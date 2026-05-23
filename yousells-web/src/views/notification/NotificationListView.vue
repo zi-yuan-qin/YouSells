@@ -139,7 +139,7 @@ onMounted(loadData)
 <style scoped>
 .unread-title {
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary);
 }
 .pagination {
   margin-top: 16px;

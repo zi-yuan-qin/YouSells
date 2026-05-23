@@ -60,7 +60,7 @@ const emit = defineEmits<{
 .reply-list__empty {
   padding: 24px 0;
   text-align: center;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 
@@ -68,7 +68,7 @@ const emit = defineEmits<{
   display: flex;
   gap: 12px;
   padding: 16px 0;
-  border-bottom: 1px solid rgba(37, 99, 235, 0.06);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .reply-item:last-child {
@@ -86,17 +86,17 @@ const emit = defineEmits<{
 .reply-item__name {
   font-weight: 600;
   font-size: 14px;
-  color: #12213d;
+  color: var(--color-text-primary);
 }
 
 .reply-item__time {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .reply-item__content {
   font-size: 14px;
-  color: #334155;
+  color: var(--color-text-secondary);
   line-height: 1.7;
   white-space: pre-wrap;
 }

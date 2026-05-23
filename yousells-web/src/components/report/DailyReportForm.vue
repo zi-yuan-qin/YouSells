@@ -109,10 +109,10 @@ async function submit() {
 
 <style scoped>
 .report-form-card {
-  background: #fafcff;
+  background: var(--color-bg-card);
   border-radius: 18px;
   padding: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--color-border);
 }
 
 .report-form-card__title {

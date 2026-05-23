@@ -180,11 +180,11 @@ onUnmounted(() => {
   margin-right: 16px;
 }
 .bell-icon {
-  color: #606266;
+  color: var(--color-text-secondary);
   transition: color 0.2s;
 }
 .bell-icon:hover {
-  color: #409eff;
+  color: var(--color-primary);
 }
 .notification-panel {
   max-height: 400px;
@@ -195,7 +195,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding-bottom: 8px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--color-border);
   margin-bottom: 8px;
 }
 .notification-header .title {
@@ -205,7 +205,7 @@ onUnmounted(() => {
 .notification-empty {
   text-align: center;
   padding: 24px 0;
-  color: #909399;
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 .notification-list {
@@ -223,13 +223,13 @@ onUnmounted(() => {
   transition: background 0.2s;
 }
 .notification-item:hover {
-  background: #f5f7fa;
+  background: var(--color-bg-hover);
 }
 .notification-item.unread {
-  background: #ecf5ff;
+  background: var(--color-primary-soft);
 }
 .notification-item.unread:hover {
-  background: #d9ecff;
+  background: var(--color-primary-glow);
 }
 .notification-content {
   flex: 1;
@@ -238,12 +238,12 @@ onUnmounted(() => {
 .notification-title {
   font-weight: 500;
   font-size: 13px;
-  color: #303133;
+  color: var(--color-text-primary);
   margin-bottom: 4px;
 }
 .notification-body {
   font-size: 12px;
-  color: #606266;
+  color: var(--color-text-secondary);
   line-height: 1.5;
   margin-bottom: 4px;
   white-space: nowrap;
@@ -252,12 +252,12 @@ onUnmounted(() => {
 }
 .notification-time {
   font-size: 11px;
-  color: #909399;
+  color: var(--color-text-muted);
 }
 .notification-footer {
   text-align: center;
   padding-top: 8px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid var(--color-border);
   margin-top: 8px;
 }
 </style>

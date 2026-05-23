@@ -40,10 +40,10 @@ const emit = defineEmits<{
 
 <style scoped>
 .next-action-card {
-  background: #fafcff;
+  background: var(--color-bg-card);
   border-radius: 18px;
   padding: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--color-border);
 }
 
 .next-action-row {
@@ -54,17 +54,17 @@ const emit = defineEmits<{
 }
 
 .next-action-row__label {
-  color: #64748b;
+  color: var(--color-text-secondary);
   min-width: 80px;
 }
 
 .next-action-row__value {
-  color: #172033;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
 .next-action-empty {
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 </style>

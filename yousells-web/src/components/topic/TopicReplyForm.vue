@@ -49,7 +49,7 @@ function handleSubmit() {
   margin: 0 0 12px;
   font-size: 15px;
   font-weight: 600;
-  color: #12213d;
+  color: var(--color-text-primary);
 }
 
 .reply-form__actions {

@@ -89,10 +89,10 @@ const emit = defineEmits<{
 
 <style scoped>
 .history-panel {
-  background: #fafcff;
+  background: var(--color-bg-card);
   border-radius: 18px;
   padding: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--color-border);
 }
 
 .history-panel__title {
@@ -102,9 +102,9 @@ const emit = defineEmits<{
 
 .history-item {
   padding: 14px;
-  background: #ffffff;
+  background: var(--color-bg-card);
   border-radius: 12px;
-  border: 1px solid rgba(37, 99, 235, 0.04);
+  border: 1px solid var(--color-border);
 }
 
 .history-item + .history-item {
@@ -121,11 +121,11 @@ const emit = defineEmits<{
 .history-item__label {
   font-weight: 700;
   font-size: 14px;
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .history-item__user {
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 
@@ -138,16 +138,16 @@ const emit = defineEmits<{
 .history-item__field {
   font-size: 13px;
   line-height: 1.6;
-  color: #42506a;
+  color: var(--color-text-secondary);
 }
 
 .history-item__field-label {
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .history-panel__empty {
   text-align: center;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   padding: 32px 0;
 }
 

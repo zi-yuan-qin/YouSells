@@ -197,12 +197,12 @@ onMounted(() => {
 
 .meta-text {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .topic-description {
   font-size: 14px;
-  color: #334155;
+  color: var(--color-text-secondary);
   line-height: 1.7;
   margin: 0;
   white-space: pre-wrap;
@@ -220,18 +220,18 @@ onMounted(() => {
   margin: 0 0 12px;
   font-size: 16px;
   font-weight: 600;
-  color: #12213d;
+  color: var(--color-text-primary);
 }
 
 .reply-count {
   font-weight: 400;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 
 .reply-form-section {
   padding-top: 8px;
-  border-top: 1px solid rgba(37, 99, 235, 0.06);
+  border-top: 1px solid var(--color-border);
 }
 
 .detail-error {
@@ -240,7 +240,7 @@ onMounted(() => {
 }
 
 .detail-error p {
-  color: #94a3b8;
+  color: var(--color-text-muted);
   margin-bottom: 12px;
 }
 </style>

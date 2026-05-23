@@ -138,17 +138,17 @@ function formatDate(dateStr: string) {
 
 <style scoped>
 .plaza-card {
-  background: #fff;
+  background: var(--color-bg-card);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--shadow-card);
   border: 1px solid var(--color-border);
   transition: box-shadow 0.25s cubic-bezier(0.2, 0, 0, 1), transform 0.25s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .plaza-card:hover {
-  box-shadow: 0 8px 24px rgba(20, 32, 61, 0.08);
+  box-shadow: var(--shadow-elevated);
   transform: translateY(-1px);
 }
 
@@ -183,12 +183,12 @@ function formatDate(dateStr: string) {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .plaza-card__time {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   margin-top: 2px;
   display: flex;
   align-items: center;
@@ -202,7 +202,7 @@ function formatDate(dateStr: string) {
 .plaza-card__summary {
   font-size: 14px;
   line-height: 1.7;
-  color: #334155;
+  color: var(--color-text-secondary);
   margin: 0 0 12px;
   white-space: pre-wrap;
 }
@@ -211,16 +211,16 @@ function formatDate(dateStr: string) {
 .plaza-card__plan {
   margin-bottom: 8px;
   padding: 10px 12px;
-  background: #f8fafc;
+  background: var(--color-bg-hover);
   border-radius: 10px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--color-border);
 }
 
 .plaza-card__field-label {
   display: block;
   font-size: 11px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -229,7 +229,7 @@ function formatDate(dateStr: string) {
 .plaza-card__field-text {
   margin: 0;
   font-size: 13px;
-  color: #475569;
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }
 
@@ -245,7 +245,7 @@ function formatDate(dateStr: string) {
   align-items: center;
   gap: 8px;
   padding-top: 12px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--color-border);
 }
 
 .plaza-card__action {
@@ -256,14 +256,14 @@ function formatDate(dateStr: string) {
   border-radius: 20px;
   border: none;
   background: transparent;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 13px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s, transform 0.1s;
 }
 
 .plaza-card__action:hover {
-  background: #f1f5f9;
+  background: var(--color-bg-hover);
 }
 
 .plaza-card__action:active {
@@ -271,8 +271,8 @@ function formatDate(dateStr: string) {
 }
 
 .plaza-card__action--active {
-  color: #2563eb;
-  background: rgba(37, 99, 235, 0.06);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 
 .plaza-card__action--animate .el-icon {
@@ -294,6 +294,6 @@ function formatDate(dateStr: string) {
 .plaza-card__created {
   margin-left: auto;
   font-size: 12px;
-  color: #cbd5e1;
+  color: var(--color-text-muted);
 }
 </style>

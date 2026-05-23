@@ -228,10 +228,10 @@ onMounted(() => {
 
 <style scoped>
 .profile-card {
-  background: #fafcff;
+  background: var(--color-bg-card);
   border-radius: 18px;
   padding: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--color-border);
 }
 
 .profile-card__header {
@@ -247,7 +247,7 @@ onMounted(() => {
   gap: 14px;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(37, 99, 235, 0.06);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .profile-card__avatar {
@@ -272,12 +272,12 @@ onMounted(() => {
 .profile-card__name {
   font-size: 18px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .profile-card__sub {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .detail-grid {
@@ -288,13 +288,13 @@ onMounted(() => {
 
 .detail-item__label {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   margin-bottom: 4px;
 }
 
 .detail-item__value {
   font-size: 14px;
-  color: #12213d;
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 </style>

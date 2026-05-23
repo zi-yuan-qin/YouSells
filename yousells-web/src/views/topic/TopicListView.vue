@@ -141,7 +141,7 @@ onMounted(() => {
 .dashboard-error {
   text-align: center;
   padding: 40px 0;
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .dashboard-error p {

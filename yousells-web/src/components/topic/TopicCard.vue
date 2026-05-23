@@ -41,16 +41,16 @@ function categoryTagType(category: string): "" | "success" | "warning" | "info" 
 
 <style scoped>
 .topic-card {
-  background: #fff;
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 16px 20px;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--color-border);
   cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .topic-card:hover {
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+  box-shadow: var(--shadow-elevated);
   transform: translateY(-1px);
 }
 
@@ -66,7 +66,7 @@ function categoryTagType(category: string): "" | "success" | "warning" | "info" 
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #12213d;
+  color: var(--color-text-primary);
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -82,6 +82,6 @@ function categoryTagType(category: string): "" | "success" | "warning" | "info" 
 
 .meta-item {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 </style>

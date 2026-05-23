@@ -65,8 +65,8 @@ const sortedItems = computed(() =>
               <span
                 class="timeline-item__progress"
                 :style="{
-                  color: progressColorMap[item.progress] || '#64748b',
-                  background: progressBgMap[item.progress] || '#f1f5f9'
+                  color: progressColorMap[item.progress] || 'var(--color-text-muted)',
+                  background: progressBgMap[item.progress] || 'var(--color-bg-hover)'
                 }"
               >
                 {{ item.progress }}
@@ -108,10 +108,10 @@ const sortedItems = computed(() =>
 
 <style scoped>
 .followup-timeline {
-  background: #fafcff;
+  background: var(--color-bg-card);
   border-radius: 18px;
   padding: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--color-border);
 }
 
 .followup-timeline__empty {
@@ -144,7 +144,7 @@ const sortedItems = computed(() =>
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-bg-card);
   box-shadow: 0 0 0 2px currentColor;
   flex-shrink: 0;
 }
@@ -161,22 +161,22 @@ const sortedItems = computed(() =>
 .timeline-item__line {
   flex: 1;
   width: 2px;
-  background: linear-gradient(to bottom, #e2e8f0, transparent);
+  background: linear-gradient(to bottom, var(--color-border), transparent);
   margin-top: 8px;
   min-height: 40px;
 }
 
 .timeline-item__card {
   flex: 1;
-  background: #ffffff;
+  background: var(--color-bg-surface);
   border-radius: 14px;
   padding: 14px 16px;
-  border: 1px solid rgba(37, 99, 235, 0.04);
+  border: 1px solid var(--color-border);
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .timeline-item__card:hover {
-  box-shadow: 0 4px 12px rgba(20, 32, 61, 0.06);
+  box-shadow: var(--shadow-elevated);
   transform: translateY(-1px);
 }
 
@@ -202,7 +202,7 @@ const sortedItems = computed(() =>
 
 .timeline-item__time {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .timeline-item__user {
@@ -224,7 +224,7 @@ const sortedItems = computed(() =>
 
 .timeline-item__user-name {
   font-size: 12px;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 
 .timeline-item__body {
@@ -241,19 +241,19 @@ const sortedItems = computed(() =>
 
 .timeline-item__field-label {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
 .timeline-item__field-text {
   margin: 0;
   font-size: 13px;
-  color: #1e293b;
+  color: var(--color-text-primary);
   line-height: 1.6;
 }
 
 .timeline-item__field-text--action {
-  color: #2563eb;
+  color: var(--color-primary);
   background: rgba(37, 99, 235, 0.04);
   padding: 6px 10px;
   border-radius: 8px;

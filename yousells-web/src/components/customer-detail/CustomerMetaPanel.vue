@@ -55,16 +55,16 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: #fafcff;
+  background: var(--color-bg-card);
   border-radius: 18px;
   padding: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid var(--color-border);
 }
 
 .meta-section__label {
   font-weight: 700;
   font-size: 14px;
-  color: #12213d;
+  color: var(--color-text-primary);
   margin-bottom: 10px;
 }
 
@@ -83,12 +83,12 @@ const emit = defineEmits<{
 }
 
 .meta-row__key {
-  color: #64748b;
+  color: var(--color-text-secondary);
   min-width: 70px;
 }
 
 .meta-row__value {
-  color: #172033;
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
@@ -96,7 +96,7 @@ const emit = defineEmits<{
   margin: 0;
   font-size: 13px;
   line-height: 1.7;
-  color: #4a5c6b;
+  color: var(--color-text-secondary);
   width: 100%;
 }
 </style>

@@ -78,7 +78,7 @@ onMounted(loadData)
   width: 24px;
   text-align: center;
   font-weight: 500;
-  color: #606266;
+  color: var(--color-text-secondary);
 }
 .user-cell {
   display: flex;
@@ -89,10 +89,10 @@ onMounted(loadData)
   font-weight: 500;
 }
 .highlight-converted {
-  color: #67c23a;
+  color: var(--color-success);
   font-weight: 600;
 }
 .rate-low {
-  color: #909399;
+  color: var(--color-text-muted);
 }
 </style>

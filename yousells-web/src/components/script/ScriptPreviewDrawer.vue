@@ -73,7 +73,7 @@ const emit = defineEmits<{
 }
 
 .preview-row__label {
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-size: 13px;
   min-width: 70px;
   flex-shrink: 0;
@@ -81,7 +81,7 @@ const emit = defineEmits<{
 
 .preview-row__value {
   font-weight: 500;
-  color: #172033;
+  color: var(--color-text-primary);
 }
 
 .preview-title {
@@ -90,12 +90,12 @@ const emit = defineEmits<{
 }
 
 .preview-content {
-  background: #f8fbff;
+  background: var(--color-bg-hover);
   border-radius: 12px;
   padding: 16px;
   line-height: 1.8;
   white-space: pre-wrap;
-  color: #42506a;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 </style>
