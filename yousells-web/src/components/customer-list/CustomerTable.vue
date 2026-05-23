@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Download, RefreshRight } from "@element-plus/icons-vue";
+import { Download, RefreshRight, View, Edit, Phone } from "@element-plus/icons-vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
 import type { CustomerListItem } from "@/types/customer-list";
 
@@ -68,6 +68,21 @@ function progressTagType(progress: string): "success" | "warning" | "info" {
       </el-table-column>
       <el-table-column prop="ownerDisplayName" label="负责人" width="110" />
       <el-table-column prop="inviterDisplayName" label="邀约人" width="110" />
+      <el-table-column label="操作" width="120" fixed="right">
+        <template #default="{ row }">
+          <div class="row-actions">
+            <el-button
+              link
+              type="primary"
+              size="small"
+              :icon="View"
+              @click.stop="emit('row-click', row)"
+            >
+              查看
+            </el-button>
+          </div>
+        </template>
+      </el-table-column>
     </el-table>
 
     <div class="table-bottom-bar">

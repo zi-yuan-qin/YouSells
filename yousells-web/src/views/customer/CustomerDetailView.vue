@@ -5,7 +5,6 @@ import { ArrowLeft } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
-import { stageLabel, followTypeLabel } from "@/constants/stage";
 import { friendlyDate, datetime } from "@/utils/format";
 import CustomerProfileCard from "@/components/customer-detail/CustomerProfileCard.vue";
 import CustomerMetaPanel from "@/components/customer-detail/CustomerMetaPanel.vue";
@@ -84,31 +83,70 @@ watch(() => route.params.id, (newId, oldId) => {
         </el-button>
       </div>
 
-      <div v-if="detail" class="customer-detail-grid">
-        <div class="customer-detail-grid__left">
-          <CustomerProfileCard
-            :detail="detail"
-            :loading="loading"
-            @updated="onDetailUpdated"
-          />
+      <div v-if="detail">
+        <div class="customer-status-bar">
+          <div class="status-bar__info">
+            <el-tag
+              size="large"
+              :type="detail.intent === '很稳' ? 'success' : detail.intent === '冷淡' ? 'danger' : 'warning'"
+              effect="dark"
+            >
+              {{ detail.intent }}
+            </el-tag>
+            <div class="status-bar__divider"></div>
+            <div class="status-bar__progress">
+              <span class="status-bar__label">当前进度</span>
+              <el-progress
+                :percentage="detail.progress === '课程' ? 75 : detail.progress === '技术栈' ? 50 : 25"
+                :color="detail.progress === '课程' ? '#10b981' : detail.progress === '技术栈' ? '#f59e0b' : '#3b82f6'"
+                :stroke-width="8"
+                :show-text="false"
+                style="width: 120px"
+              />
+              <span class="status-bar__value">{{ detail.progress }}</span>
+            </div>
+          </div>
+          <div class="status-bar__actions">
+            <el-button
+              type="primary"
+              size="small"
+              @click="router.push({ name: 'customer-detail', params: { id: detail.id }, query: { tab: 'followup' } })"
+            >
+              写跟进
+            </el-button>
+          </div>
         </div>
 
-        <div class="customer-detail-grid__right">
-          <CustomerMetaPanel
-            :detail="detail"
-            :loading="loading"
-            @tags-updated="onDetailUpdated"
-          />
+        <div class="customer-detail-grid">
+          <div class="customer-detail-grid__left">
+            <CustomerProfileCard
+              :detail="detail"
+              :loading="loading"
+              @updated="onDetailUpdated"
+            />
+          </div>
 
-          <CustomerNextActionCard
-            :follow-ups="followUps"
-            :loading="loading"
-            @updated="onDetailUpdated"
-          />
+          <div class="customer-detail-grid__right">
+            <CustomerMetaPanel
+              :detail="detail"
+              :loading="loading"
+              @tags-updated="onDetailUpdated"
+            />
+
+            <CustomerNextActionCard
+              :follow-ups="followUps"
+              :loading="loading"
+              @updated="onDetailUpdated"
+            />
+          </div>
         </div>
       </div>
 
-      <EmptyState v-else-if="!loading" title="客户不存在" description="该客户可能已被删除或 ID 有误" />
+      <EmptyState
+        v-else-if="!loading"
+        title="客户不存在"
+        description="该客户可能已被删除或 ID 有误"
+      />
 
       <div v-if="detail">
         <div class="followup-section-header">
@@ -141,6 +179,46 @@ watch(() => route.params.id, (newId, oldId) => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.customer-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.status-bar__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.status-bar__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+}
+
+.status-bar__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.status-bar__label {
+  font: var(--font-caption);
+  color: var(--color-text-muted);
+}
+
+.status-bar__value {
+  font: var(--font-h3);
+  color: var(--color-text-primary);
 }
 
 .followup-section-header {

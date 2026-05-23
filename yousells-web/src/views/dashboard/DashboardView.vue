@@ -120,35 +120,47 @@ async function updateCharts() {
       if (!trendChartInstance) {
         trendChartInstance = echarts.init(trendChartRef.value);
       }
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      const lineColor = isDark ? "#60a5fa" : "#2563eb";
+      const gridColor = isDark ? "#334155" : "#f1f5f9";
+      const textColor = isDark ? "#94a3b8" : "#64748b";
       trendChartInstance.setOption({
-        tooltip: { trigger: "axis" },
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: isDark ? "#1e293b" : "#fff",
+          borderColor: isDark ? "#334155" : "#e2e8f0",
+          textStyle: { color: isDark ? "#f1f5f9" : "#1e293b" }
+        },
         grid: { left: "3%", right: "4%", bottom: "3%", top: "10%", containLabel: true },
         xAxis: {
           type: "category",
           boundaryGap: false,
           data: overview.value.trendData.map(d => d.date),
-          axisLine: { lineStyle: { color: "#e2e8f0" } },
-          axisLabel: { color: "#94a3b8", fontSize: 11 }
+          axisLine: { lineStyle: { color: gridColor } },
+          axisLabel: { color: textColor, fontSize: 11 }
         },
         yAxis: {
           type: "value",
           axisLine: { show: false },
-          splitLine: { lineStyle: { color: "#f1f5f9" } },
-          axisLabel: { color: "#94a3b8", fontSize: 11 }
+          splitLine: { lineStyle: { color: gridColor } },
+          axisLabel: { color: textColor, fontSize: 11 }
         },
         series: [{
           name: "新增客户",
           type: "line",
           smooth: true,
-          symbol: "none",
-          lineStyle: { color: "#2563eb", width: 2 },
+          symbol: "circle",
+          symbolSize: 6,
+          showSymbol: false,
+          lineStyle: { color: lineColor, width: 3 },
+          itemStyle: { color: lineColor },
           areaStyle: {
             color: {
               type: "linear",
               x: 0, y: 0, x2: 0, y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(37, 99, 235, 0.15)" },
-                { offset: 1, color: "rgba(37, 99, 235, 0.01)" }
+                { offset: 0, color: isDark ? "rgba(96, 165, 250, 0.25)" : "rgba(37, 99, 235, 0.2)" },
+                { offset: 1, color: isDark ? "rgba(96, 165, 250, 0.01)" : "rgba(37, 99, 235, 0.01)" }
               ]
             }
           },
@@ -157,32 +169,49 @@ async function updateCharts() {
       });
     }
 
-    // Update pie chart
+    // Update funnel chart
     if (pieChartRef.value && overview.value.progressDistribution?.length > 0) {
       if (!pieChartInstance) {
         pieChartInstance = echarts.init(pieChartRef.value);
       }
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      const textColor = isDark ? "#94a3b8" : "#64748b";
+      const funnelData = overview.value.progressDistribution
+        .slice()
+        .reverse()
+        .map(d => ({ name: d.stage, value: d.count }));
       pieChartInstance.setOption({
-        tooltip: { trigger: "item", formatter: "{b}: {c} ({d}%)" },
-        legend: {
-          bottom: "0%",
-          left: "center",
-          itemWidth: 10,
-          itemHeight: 10,
-          textStyle: { color: "#64748b", fontSize: 11 }
-        },
+        tooltip: { trigger: "item", formatter: "{b}: {c}" },
+        color: isDark
+          ? ["#60a5fa", "#34d399", "#fbbf24", "#f87171"]
+          : ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"],
         series: [{
-          type: "pie",
-          radius: ["40%", "70%"],
-          center: ["50%", "45%"],
-          avoidLabelOverlap: false,
-          itemStyle: { borderRadius: 4, borderColor: "#fff", borderWidth: 2 },
-          label: { show: false },
-          emphasis: { label: { show: true, fontSize: 14, fontWeight: "bold" } },
-          data: overview.value.progressDistribution.map(d => ({ name: d.stage, value: d.count })),
-          color: ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"]
+          type: "funnel",
+          left: "10%",
+          right: "10%",
+          top: "5%",
+          bottom: "5%",
+          minSize: "0%",
+          maxSize: "100%",
+          sort: "none",
+          gap: 2,
+          label: {
+            show: true,
+            position: "inside",
+            formatter: "{b}\n{c}",
+            color: "#fff",
+            fontSize: 11
+          },
+          itemStyle: {
+            borderColor: isDark ? "#1e293b" : "#fff",
+            borderWidth: 2
+          },
+          emphasis: {
+            label: { fontSize: 13, fontWeight: "bold" }
+          },
+          data: funnelData
         }]
-      });
+      }, true);
     }
   } catch {
     // echarts not available
@@ -297,10 +326,15 @@ onUnmounted(() => {
           </div>
           <DashboardCustomerList :customers="overview.focusCustomers" :loading />
         </div>
-        <div class="todo-card">
+        <div class="todo-card" :class="{ 'todo-card--warning': (overview.silentCustomers?.length ?? 0) > 5, 'todo-card--danger': (overview.silentCustomers?.length ?? 0) > 10 }">
           <div class="todo-card__header">
-            <el-icon><Warning /></el-icon>
-            <span>沉默客户（3天未跟进）</span>
+            <div class="todo-card__header-title">
+              <el-icon><Warning /></el-icon>
+              <span>沉默客户</span>
+              <el-tag v-if="overview.silentCustomers?.length" :type="(overview.silentCustomers.length > 10) ? 'danger' : (overview.silentCustomers.length > 5) ? 'warning' : 'info'" size="small">
+                {{ overview.silentCustomers.length }} 位
+              </el-tag>
+            </div>
           </div>
           <DashboardCustomerList :customers="overview.silentCustomers" :loading />
         </div>
@@ -405,7 +439,7 @@ onUnmounted(() => {
 
 .dashboard-todos {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -420,11 +454,28 @@ onUnmounted(() => {
 .todo-card__header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   margin-bottom: 12px;
+}
+
+.todo-card__header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-primary);
+}
+
+.todo-card--warning {
+  border-color: var(--color-warning);
+  box-shadow: 0 0 0 1px var(--color-warning-soft), var(--shadow-card);
+}
+
+.todo-card--danger {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 1px var(--color-danger-soft), var(--shadow-card);
 }
 
 @media (max-width: 1100px) {
