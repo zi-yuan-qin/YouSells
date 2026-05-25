@@ -21,8 +21,8 @@
 
 | 层 | 当前状态 | 缺口 | 确认人 |
 |---|---|---|---|
-| 数据库 | MySQL 8.4，`task_boards`/`customer_follow_ups`/`script_library`/`reports` 等表就绪 | 需新增 AI 结果缓存表/向量存储方案 | 梓源 |
-| 后端 | Spring Boot 3.5，9 个业务模块，186 测试全过 | 需新增 LLM 调用基础设施(Prompt 管理/JSON 解析/缓存) | 梓源 |
+| 数据库 | MySQL 8.4 + Qdrant（向量数据库，Docker 部署），`task_boards`/`customer_follow_ups`/`script_library`/`reports` 等表就绪 | 需新增 AI 结果缓存表 | 梓源 |
+| 后端 | Spring Boot 3.5，9 个业务模块，186 测试全过 | 需新增 LLM 调用基础设施(Prompt 管理/JSON 解析/缓存) + Qdrant SDK 封装 | 梓源 |
 | 前端 | Vue 3 + Element Plus，16 个页面，P2 bug 已清零 | 需新增 AI 结果展示组件(洞察面板/推荐侧栏/风险卡片) | 梓源 |
 | 测试 | 186 后端测试，前端 Playwright 已配置 | 每个 AI 模块需独立测试方案 | 梓源 |
 | 文档 | docs/00-08，P0/P1/P2 规划+日志就绪 | 需新增 P3 总规划 + 4 份个人任务说明书 | 梓源 |
@@ -45,7 +45,7 @@
 | 项 | 原因 |
 |---|---|
 | LLM 模型选型与 API Key 管理 | 队长基础设施，Phase 0 前置 |
-| 向量数据库自建 | 初期用 LLM 直接匹配，后续 P4 升级 |
+| AI 训练/微调 | 用 Prompt Engineering + Embedding，不涉及模型训练 |
 | AI 训练/微调 | 用 Prompt Engineering，不涉及模型训练 |
 | 实时 AI 对话/聊天机器人 | P4 考虑 |
 | 移动端适配 | P4 考虑 |
@@ -58,11 +58,12 @@
 
 | 任务编号 | 目标 | 预估 | 交付物 |
 |---|---|---|---|
-| LEAD-P3-001 | LLM 调用基础设施：`AiService` 统一封装（Prompt 模板管理 + JSON Schema 约束输出 + 超时/重试/降级） | 2天 | `yousells-server/src/main/java/com/yousells/common/ai/` |
-| LEAD-P3-002 | AI 配置管理：`application.yml` 中 LLM 参数（endpoint/apiKey/model/temperature），dev 环境可用 mock | 0.5天 | 配置文件 |
-| LEAD-P3-003 | 前端 AI 加载态组件：`AiLoadingCard.vue`（思考中动画/结果展示/错误重试） | 0.5天 | 1 个组件 |
-| LEAD-P3-004 | P3 数据库迁移脚本：AI 结果缓存表 + 风险评分表（如需要） | 0.5天 | SQL 脚本 |
-| LEAD-P3-005 | 4 份个人任务说明书 | 2天 | docs/P3-{志明/哲涛/许润/嘉诚}.md |
+| LEAD-P3-001 | LLM 调用基础设施：`AiService` 统一封装（Prompt 模板管理 + JSON Schema 约束输出 + 超时/重试/降级 + Embedding 调用） | 2天 | `yousells-server/src/main/java/com/yousells/common/ai/` |
+| LEAD-P3-002 | Qdrant 向量数据库：docker-compose 加服务 + `EmbeddingService` 封装（文本→向量→写入 Qdrant→相似度检索） | 0.5天 | docker-compose.yml + `common/ai/EmbeddingService.java` |
+| LEAD-P3-003 | AI 配置管理：`application.yml` 中 LLM 参数（endpoint/apiKey/model/temperature）+ Qdrant 连接参数，dev 环境可用 mock | 0.5天 | 配置文件 |
+| LEAD-P3-004 | 前端 AI 加载态组件：`AiLoadingCard.vue`（思考中动画/结果展示/错误重试） | 0.5天 | 1 个组件 |
+| LEAD-P3-005 | P3 数据库迁移脚本：AI 结果缓存表 + 风险评分表 | 0.5天 | SQL 脚本 |
+| LEAD-P3-006 | 4 份个人任务说明书 | 2天 | docs/P3-{志明/哲涛/许润/嘉诚}.md |
 
 **队长基础设施不阻塞成员启动**：成员在拿到任务说明书后即可在自己的模块目录下编码，队长并行推进基础设施。
 
@@ -72,10 +73,10 @@
 
 | 成员 | 角色 | 优势 | 模块 | 涉及域 | 最终交付 |
 |---|---|---|---|---|---|
-| 秦梓源 | 队长/架构 | 全栈+基础设施 | LEAD-P3 | 公共基础设施 | LLM 基础设施 + 4 份说明书 + 集成验收 |
+| 秦梓源 | 队长/架构 | 全栈+基础设施 | LEAD-P3 | 公共基础设施 | AiService + Qdrant + 6 份说明书 + 集成验收 |
 | 志明 | 后端 | 客户域/跟进域 | P3-AI-INSIGHT | customer / followup | 客户洞察面板前后端 |
 | 哲涛 | 后端 | 日报周报/任务/话术 | P3-AI-REPORT | report / task / followup / customer | AI 日报周报前后端 |
-| 许润 | 前端 | Vue 组件/交互 | P3-AI-SCRIPT | script / followup / customer | 话术推荐侧栏前后端 |
+| 许润 | 前端 | Vue 组件/交互 | P3-AI-SCRIPT | script / followup / customer / Qdrant | 话术推荐侧栏前后端（含向量检索） |
 | 嘉诚 | 前端 | Dashboard/UI | P3-AI-CHURN | customer / followup / dashboard / notification | 流失预警引擎前后端 |
 
 ---
@@ -85,7 +86,7 @@
 ```text
 ┌─────────────────────────────────────────────────────────┐
 │              队长 LEAD-P3（第1周）                        │
-│  AiService / 配置 / 前端组件 / DB脚本 / 个人说明书         │
+│  AiService / Qdrant / 配置 / 前端组件 / DB脚本 / 说明书     │
 └────────────────────┬────────────────────────────────────┘
                      │
         ┌────────────┼────────────┬────────────┐
@@ -104,7 +105,7 @@
           └─────────────────────┘
 ```
 
-四个模块**零相互依赖**，完全并行。仅依赖队长基础设施（LEAD-P3-001 ~ 004）。
+四个模块**零相互依赖**，完全并行。仅依赖队长基础设施（LEAD-P3-001 ~ 005）。许润模块额外依赖 Qdrant（LEAD-P3-002），拿到说明书后前端部分不受阻塞可先行启动。
 
 ---
 
@@ -149,11 +150,12 @@
 
 | 表 | 操作 | 说明 | 负责人 |
 |---|---|---|---|
-| `ai_insight_cache` | 新建 | customer_id, insight_json, generated_at, expires_at | 志明 |
-| `ai_churn_risk` | 新建 | customer_id, risk_level, risk_score, risk_factors(json), suggestion, evaluated_at | 嘉诚 |
-| `script_embeddings` | 暂不建 | P4 升级向量检索时再建 | — |
+| `ai_insight_cache` | 新建（MySQL） | customer_id, insight_json, generated_at, expires_at | 志明 |
+| `ai_churn_risk` | 新建（MySQL） | customer_id, risk_level, risk_score, risk_factors(json), suggestion, evaluated_at | 嘉诚 |
+| `script_vectors` | 新建（Qdrant collection） | 话术标题+内容→embedding 向量，由队长 LEAD-P3-002 初始化 | 梓源 |
 
 **迁移文件：** `yousells-server/src/main/resources/db/05_schema_p3.sql`
+**Qdrant 初始化：** 队长在 `EmbeddingService` 中提供 `initScriptVectors()` 方法，话术库 CRUD 时同步更新向量
 
 ---
 
@@ -220,10 +222,10 @@
 
 | 阶段 | 时间 | 负责人 | 内容 |
 |---|---|---|---|
-| 队长基础设施 | 第1周 | 梓源 | AiService + 配置 + 前端组件 + DB脚本 + 4份说明书 |
+| 队长基础设施 | 第1周 | 梓源 | AiService + Qdrant + 配置 + 前端组件 + DB脚本 + 说明书 |
 | 志明 P3-AI-INSIGHT | 第1-2周 | 志明 | 后端洞察服务 + 前端面板（拿到说明书即可启动） |
 | 哲涛 P3-AI-REPORT | 第1-2周 | 哲涛 | 后端数据聚合+AI生成 + 前端预填表单 |
-| 许润 P3-AI-SCRIPT | 第1-2周 | 许润 | 后端推荐引擎 + 前端侧栏组件 |
+| 许润 P3-AI-SCRIPT | 第1-2周 | 许润 | 前端侧栏（不阻塞）→ 后端向量检索+LLM排序（依赖 Qdrant） |
 | 嘉诚 P3-AI-CHURN | 第1-2周 | 嘉诚 | 后端评分引擎+定时任务 + 前端Dashboard卡片 |
 | 集成验收 | 第2周末 | 梓源 | 逐个模块联调+Review+合并 |
 
@@ -233,8 +235,8 @@
 
 ## 13. 即刻行动
 
-1. **梓源**：完成 LEAD-P3-001 ~ 004（AiService + 配置 + 组件 + DB脚本）
-2. **梓源**：完成 LEAD-P3-005（4 份个人任务说明书）
+1. **梓源**：完成 LEAD-P3-001 ~ 005（AiService + Qdrant + 配置 + 组件 + DB脚本）
+2. **梓源**：完成 LEAD-P3-006（4 份个人任务说明书）
 3. **全员**：拿到个人任务说明书后，创建分支，启动开发
 4. **全员**：每日发进度更新
 5. **梓源**：第2周末组织集成验收
