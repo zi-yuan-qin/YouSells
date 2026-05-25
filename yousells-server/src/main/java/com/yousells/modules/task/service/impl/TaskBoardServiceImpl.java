@@ -17,6 +17,7 @@ import com.yousells.modules.task.dto.TaskCreateRequest;
 import com.yousells.modules.task.dto.TaskLogCreateRequest;
 import com.yousells.modules.task.dto.TaskQueryRequest;
 import com.yousells.modules.task.dto.TaskStatusUpdateRequest;
+import com.yousells.modules.task.dto.TaskUpdateRequest;
 import com.yousells.modules.task.entity.TaskBoardEntity;
 import com.yousells.modules.task.entity.TaskLogEntity;
 import com.yousells.modules.task.mapper.TaskBoardMapper;
@@ -130,6 +131,54 @@ public class TaskBoardServiceImpl implements TaskBoardService {
         }
 
         return entity.getId();
+    }
+
+    @Override
+    @Transactional
+    public void updateTask(Long id, TaskUpdateRequest request) {
+        TaskBoardEntity entity = taskBoardMapper.selectById(id);
+        if (entity == null) {
+            throw new BusinessException(ErrorCodeConstants.NOT_FOUND, "task not found");
+        }
+        LoginUser currentUser = SecurityUserContext.requireCurrentUser();
+        if (!currentUser.userId().equals(entity.getOwnerUserId()) && !currentUser.userId().equals(entity.getCreatorUserId())) {
+            throw new BusinessException(ErrorCodeConstants.FORBIDDEN, "无权修改该任务");
+        }
+
+        // 检查新的负责人是否在可操作范围内
+        List<Long> visibleUserIds = resolveVisibleOwnerIds();
+        if (!visibleUserIds.contains(request.ownerUserId())) {
+            throw new BusinessException(ErrorCodeConstants.FORBIDDEN, "指定的执行人不在可操作范围内");
+        }
+
+        String oldOwnerUserId = String.valueOf(entity.getOwnerUserId());
+        entity.setTaskTitle(request.taskTitle());
+        entity.setStatus(request.status());
+        entity.setTaskDescription(request.taskDescription());
+        entity.setPriority(request.priority());
+        entity.setOwnerUserId(request.ownerUserId());
+        entity.setDueAt(request.dueAt());
+        taskBoardMapper.updateById(entity);
+
+        LoginUser user = SecurityUserContext.requireCurrentUser();
+        TaskLogEntity log = new TaskLogEntity();
+        log.setTaskId(id);
+        log.setUserId(user.userId());
+        log.setType("编辑任务");
+        log.setContent("更新了任务「" + entity.getTaskTitle() + "」");
+        taskLogMapper.insert(log);
+
+        // 如果负责人变更了，通知新的负责人
+        if (!oldOwnerUserId.equals(String.valueOf(request.ownerUserId()))) {
+            NotificationEntity notification = new NotificationEntity();
+            notification.setUserId(request.ownerUserId());
+            notification.setType(NotificationTypeConstants.TASK_ASSIGNED);
+            notification.setTitle("任务负责人变更");
+            notification.setContent("你被指定为任务「" + entity.getTaskTitle() + "」的新负责人");
+            notification.setBusinessType("task");
+            notification.setBusinessId(entity.getId());
+            notificationService.sendNotification(notification);
+        }
     }
 
     @Override

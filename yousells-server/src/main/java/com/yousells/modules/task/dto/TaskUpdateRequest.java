@@ -14,8 +14,6 @@ public record TaskUpdateRequest(
         String priority,
         @NotNull(message = "ownerUserId cannot be null")
         Long ownerUserId,
-        Long assistantUserId,
-        LocalDateTime dueAt,
-        String nextAction
+        LocalDateTime dueAt
 ) {
 }

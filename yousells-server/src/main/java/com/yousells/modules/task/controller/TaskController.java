@@ -7,6 +7,7 @@ import com.yousells.modules.task.dto.TaskCreateRequest;
 import com.yousells.modules.task.dto.TaskLogCreateRequest;
 import com.yousells.modules.task.dto.TaskQueryRequest;
 import com.yousells.modules.task.dto.TaskStatusUpdateRequest;
+import com.yousells.modules.task.dto.TaskUpdateRequest;
 import com.yousells.modules.task.service.TaskBoardService;
 import com.yousells.modules.task.vo.TaskBoardColumnVo;
 import com.yousells.modules.task.vo.TaskBoardItemVo;
@@ -52,6 +53,13 @@ public class TaskController {
     @PostMapping
     public ApiResponse<IdResponse> create(@Valid @RequestBody TaskCreateRequest request) {
         return ApiResponse.success(new IdResponse(taskBoardService.createTask(request)));
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<Void> update(@PathVariable Long id,
+                                    @Valid @RequestBody TaskUpdateRequest request) {
+        taskBoardService.updateTask(id, request);
+        return ApiResponse.success();
     }
 
     @PutMapping("/{id}/status")
