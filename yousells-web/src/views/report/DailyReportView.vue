@@ -29,10 +29,10 @@ async function loadTodayReport() {
   }
 }
 
-async function loadHistory(p = 1) {
+async function loadHistory(p = 1, ps = 20) {
   historyLoading.value = true;
   try {
-    const data = await fetchDailyReportHistory(p, 20);
+    const data = await fetchDailyReportHistory(p, ps);
     history.value = data.list;
     historyTotal.value = data.total;
     historyPage.value = p;

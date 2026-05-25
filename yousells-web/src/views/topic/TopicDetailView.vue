@@ -40,8 +40,8 @@ async function loadDetail() {
     }
     const data = await fetchTopicDetail(id);
     topic.value = data;
-  } catch (e) {
-    if (e instanceof Error && e.message.includes("404")) {
+  } catch (e: any) {
+    if (e?.response?.status === 404) {
       notFound.value = true;
     } else {
       error.value = true;

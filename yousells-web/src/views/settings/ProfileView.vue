@@ -108,7 +108,6 @@ async function handleUpdatePassword() {
 }
 
 onMounted(() => {
-  profileForm.realName = authStore.currentUser?.realName ?? "";
   void loadProfile();
 });
 </script>

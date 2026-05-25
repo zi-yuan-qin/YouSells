@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import PageSection from '@/components/app/PageSection.vue'
 import { getLeaderboard } from '@/api/leaderboard'
 import type { LeaderboardItem } from '@/types/leaderboard'
@@ -10,8 +11,9 @@ const data = ref<LeaderboardItem[]>([])
 async function loadData() {
   loading.value = true
   try {
-    const res = await getLeaderboard()
-    data.value = res.data.data
+    data.value = await getLeaderboard()
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : "战绩排行加载失败")
   } finally {
     loading.value = false
   }

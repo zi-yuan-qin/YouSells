@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Search } from "@element-plus/icons-vue";
+
 const props = defineProps<{
   modelValue: {
     category: string;

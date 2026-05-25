@@ -32,3 +32,7 @@ export interface TaskUpdateRequest {
   ownerUserId: number;
   dueAt?: string | null;
 }
+
+export interface TaskStatusUpdateRequest {
+  status: string;
+}

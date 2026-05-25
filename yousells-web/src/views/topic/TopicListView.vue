@@ -101,7 +101,7 @@ onMounted(() => {
       </div>
 
       <div v-else-if="topics.length === 0 && !loading">
-        <EmptyState title="暂无问题" description="攻略区空空如也，来发起第一个讨论吧" action-text="发起提问" @action="$router.push({ name: 'topic-create' })" />
+        <EmptyState title="暂无问题" description="攻略区空空如也，来发起第一个讨论吧" action-text="发起提问" @action="createDialogVisible = true" />
       </div>
 
       <div v-else class="topic-list">

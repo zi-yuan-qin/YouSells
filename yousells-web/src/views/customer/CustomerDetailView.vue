@@ -5,7 +5,6 @@ import { ArrowLeft } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import PageSection from "@/components/app/PageSection.vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
-import { friendlyDate, datetime } from "@/utils/format";
 import CustomerProfileCard from "@/components/customer-detail/CustomerProfileCard.vue";
 import CustomerMetaPanel from "@/components/customer-detail/CustomerMetaPanel.vue";
 import CustomerNextActionCard from "@/components/customer-detail/CustomerNextActionCard.vue";
@@ -15,32 +14,58 @@ import { fetchCustomerDetail } from "@/api/customer-detail";
 import { fetchFollowUps } from "@/api/followup";
 import type { CustomerDetail } from "@/types/customer-detail";
 import type { FollowUpRecord } from "@/types/followup";
+import { RouteName } from "@/router/route-names";
+
+const PROGRESS_CONFIG: Record<string, { percentage: number; color: string }> = {
+  "职规": { percentage: 25, color: "#3b82f6" },
+  "技术栈": { percentage: 50, color: "#f59e0b" },
+  "课程": { percentage: 75, color: "#10b981" },
+};
+const DEFAULT_PROGRESS = { percentage: 25, color: "#3b82f6" };
 
 const route = useRoute();
 const router = useRouter();
 const loading = ref(false);
 const detail = ref<CustomerDetail | null>(null);
 const followUps = ref<FollowUpRecord[]>([]);
+const followUpTotal = ref(0);
+const followUpPage = ref(1);
+const followUpPageSize = 20;
+let requestId = 0;
 
 async function loadData() {
-  loading.value = true;
-  try {
-    const id = String(route.params.id);
-    if (!id || id === "undefined") {
-      ElMessage.error("客户 ID 无效");
-      return;
-    }
-    const [detailData, followUpData] = await Promise.all([
-      fetchCustomerDetail(id),
-      fetchFollowUps(id)
-    ]);
-    detail.value = detailData;
-    followUps.value = followUpData.list;
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : "客户详情加载失败");
-  } finally {
-    loading.value = false;
+  const id = String(route.params.id);
+  if (!id || id === "undefined") {
+    ElMessage.error("客户 ID 无效");
+    return;
   }
+
+  const currentRequestId = ++requestId;
+  loading.value = true;
+
+  const [detailResult, followUpResult] = await Promise.allSettled([
+    fetchCustomerDetail(id),
+    fetchFollowUps(id, followUpPage.value, followUpPageSize)
+  ]);
+
+  if (currentRequestId !== requestId) return;
+
+  if (detailResult.status === "fulfilled") {
+    detail.value = detailResult.value;
+  } else {
+    detail.value = null;
+    ElMessage.error(detailResult.reason instanceof Error ? detailResult.reason.message : "客户详情加载失败");
+  }
+
+  if (followUpResult.status === "fulfilled") {
+    followUps.value = followUpResult.value.list;
+    followUpTotal.value = followUpResult.value.total;
+  } else {
+    followUps.value = [];
+    ElMessage.error(followUpResult.reason instanceof Error ? followUpResult.reason.message : "跟进记录加载失败");
+  }
+
+  loading.value = false;
 }
 
 async function onDetailUpdated() {
@@ -48,6 +73,12 @@ async function onDetailUpdated() {
 }
 
 async function onFollowUpCreated() {
+  followUpPage.value = 1;
+  await loadData();
+}
+
+async function onFollowUpPageChange(page: number) {
+  followUpPage.value = page;
   await loadData();
 }
 
@@ -77,7 +108,7 @@ watch(() => route.params.id, (newId, oldId) => {
           text
           type="primary"
           :icon="ArrowLeft"
-          @click="router.push({ path: '/customers' })"
+          @click="router.push({ name: RouteName.CustomerList })"
         >
           返回客户列表
         </el-button>
@@ -97,8 +128,8 @@ watch(() => route.params.id, (newId, oldId) => {
             <div class="status-bar__progress">
               <span class="status-bar__label">当前进度</span>
               <el-progress
-                :percentage="detail.progress === '课程' ? 75 : detail.progress === '技术栈' ? 50 : 25"
-                :color="detail.progress === '课程' ? '#10b981' : detail.progress === '技术栈' ? '#f59e0b' : '#3b82f6'"
+                :percentage="PROGRESS_CONFIG[detail.progress]?.percentage ?? DEFAULT_PROGRESS.percentage"
+                :color="PROGRESS_CONFIG[detail.progress]?.color ?? DEFAULT_PROGRESS.color"
                 :stroke-width="8"
                 :show-text="false"
                 style="width: 120px"
@@ -121,13 +152,11 @@ watch(() => route.params.id, (newId, oldId) => {
             <CustomerMetaPanel
               :detail="detail"
               :loading="loading"
-              @tags-updated="onDetailUpdated"
             />
 
             <CustomerNextActionCard
               :follow-ups="followUps"
               :loading="loading"
-              @updated="onDetailUpdated"
             />
           </div>
         </div>
@@ -152,6 +181,15 @@ watch(() => route.params.id, (newId, oldId) => {
         <FollowUpTimeline
           :follow-ups="followUps"
           :loading="loading"
+        />
+        <el-pagination
+          v-if="followUpTotal > followUpPageSize"
+          :current-page="followUpPage"
+          :page-size="followUpPageSize"
+          :total="followUpTotal"
+          layout="total, prev, pager, next"
+          style="margin-top: 16px; justify-content: flex-end"
+          @current-change="onFollowUpPageChange"
         />
       </div>
     </PageSection>

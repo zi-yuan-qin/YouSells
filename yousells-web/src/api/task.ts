@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 import type { ApiResponse, PageResponse, IdResponse } from "@/types/api";
-import type { TaskBoardColumn, TaskBoardItem, TaskCreateRequest, TaskUpdateRequest } from "@/types/task";
+import type { TaskBoardColumn, TaskBoardItem, TaskCreateRequest, TaskUpdateRequest, TaskStatusUpdateRequest } from "@/types/task";
 
 export async function fetchTasks(params: { page?: number; pageSize?: number; status?: string } = {}): Promise<PageResponse<TaskBoardItem>> {
   const response = await request.get<ApiResponse<PageResponse<TaskBoardItem>>>("/tasks", { params });
@@ -19,4 +19,8 @@ export async function createTask(data: TaskCreateRequest): Promise<IdResponse> {
 
 export async function updateTask(id: number, data: TaskUpdateRequest): Promise<void> {
   await request.put<ApiResponse<null>>(`/tasks/${id}`, data);
+}
+
+export async function updateTaskStatus(id: number, data: TaskStatusUpdateRequest): Promise<void> {
+  await request.put<ApiResponse<null>>(`/tasks/${id}/status`, data);
 }

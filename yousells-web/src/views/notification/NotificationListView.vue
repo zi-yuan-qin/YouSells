@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import PageSection from '@/components/app/PageSection.vue'
 import { getNotifications, markRead, markAllRead } from '@/api/notification'
 import type { NotificationItem } from '@/types/notification'
@@ -17,8 +18,10 @@ async function loadData() {
   loading.value = true
   try {
     const res = await getNotifications(page.value, pageSize.value)
-    notifications.value = res.data.data.list
-    total.value = res.data.data.total
+    notifications.value = res.list
+    total.value = res.total
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : "通知加载失败")
   } finally {
     loading.value = false
   }
@@ -35,8 +38,8 @@ async function handleMarkAllRead() {
   notifications.value.forEach(n => n.isRead = 1)
 }
 
-function handleClickItem(item: NotificationItem) {
-  handleMarkRead(item)
+async function handleClickItem(item: NotificationItem) {
+  await handleMarkRead(item)
   if (item.businessType === 'task' && item.businessId) {
     router.push({ name: RouteName.TaskBoard })
   } else if (item.businessType === 'customer' && item.businessId) {
@@ -132,6 +135,7 @@ onMounted(loadData)
       layout="total, prev, pager, next"
       class="pagination"
       @current-change="loadData"
+      @size-change="loadData"
     />
   </PageSection>
 </template>

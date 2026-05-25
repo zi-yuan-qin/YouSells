@@ -41,6 +41,14 @@ const levelOptions = [
   { label: "T3 主管", value: "T3" }
 ];
 
+const managerNameMap = computed(() => {
+  const map: Record<number, string> = {};
+  for (const u of users.value) {
+    map[u.userId] = u.realName;
+  }
+  return map;
+});
+
 const managerOptions = computed(() => {
   return users.value
     .filter(u => u.status === "ACTIVE")
@@ -54,8 +62,15 @@ const formRules: FormRules = {
   ],
   realName: [{ required: true, message: "请输入真实姓名", trigger: "blur" }],
   password: [
-    { required: true, message: "请输入密码", trigger: "blur" },
-    { min: 6, max: 50, message: "密码 6-50 位", trigger: "blur" }
+    {
+      validator: (_rule, value, callback) => {
+        if (dialogMode.value === "edit") { callback(); return; }
+        if (!value) { callback(new Error("请输入密码")); return; }
+        if (value.length < 6 || value.length > 50) { callback(new Error("密码 6-50 位")); return; }
+        callback();
+      },
+      trigger: "blur"
+    }
   ],
   confirmPassword: [
     {
@@ -206,7 +221,7 @@ onMounted(() => {
         <el-table-column prop="managerUserId" label="直属上级" min-width="120">
           <template #default="{ row }">
             <span v-if="row.managerUserId">
-              {{ users.find(u => u.userId === row.managerUserId)?.realName ?? "-" }}
+              {{ managerNameMap[row.managerUserId] ?? "-" }}
             </span>
             <span v-else class="text-muted">-</span>
           </template>

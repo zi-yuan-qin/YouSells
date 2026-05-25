@@ -158,7 +158,6 @@ function onRowClick(row: CustomerListItem) {
 }
 
 function onQueryUpdate(v: CustomerQuery) {
-  Object.keys(query).forEach(k => delete (query as Record<string, unknown>)[k]);
   Object.assign(query, v);
 }
 
@@ -174,7 +173,7 @@ onMounted(() => {
       title="客户管理"
       description="学生客户总表，支持按年级/进度/意向筛选"
     >
-      <CustomerFilterBar :model-value="query" :loading @update:model-value="onQueryUpdate" @search="onSearch" @reset="onReset" />
+      <CustomerFilterBar :model-value="query" :loading="loading" @update:model-value="onQueryUpdate" @search="onSearch" @reset="onReset" />
 
       <div class="customer-toolbar">
         <el-button type="primary" @click="createDialogVisible = true">

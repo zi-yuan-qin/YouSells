@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Download, RefreshRight, View, Edit, Phone } from "@element-plus/icons-vue";
+import { Download, RefreshRight, View } from "@element-plus/icons-vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
 import type { CustomerListItem } from "@/types/customer-list";
 

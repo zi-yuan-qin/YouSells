@@ -48,8 +48,7 @@ function connectWebSocket() {
 
 async function loadUnreadCount() {
   try {
-    const res = await getUnreadCount()
-    unreadCount.value = res.data.data
+    unreadCount.value = await getUnreadCount()
   } catch {
     // ignore
   }
@@ -58,7 +57,7 @@ async function loadUnreadCount() {
 async function loadNotifications() {
   try {
     const res = await getNotifications(1, 10)
-    notifications.value = res.data.data.list
+    notifications.value = res.list
   } catch {
     // ignore
   }
@@ -99,6 +98,7 @@ function startPolling() {
 }
 
 onMounted(() => {
+  isMounted = true
   loadUnreadCount()
   connectWebSocket()
   startPolling()
@@ -166,7 +166,7 @@ onUnmounted(() => {
       </div>
 
       <div class="notification-footer">
-        <el-button link type="primary" size="small" @click="router.push('/notifications')">
+        <el-button link type="primary" size="small" @click="router.push({ name: RouteName.NotificationList })">
           查看全部
         </el-button>
       </div>

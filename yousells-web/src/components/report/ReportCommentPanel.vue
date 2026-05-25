@@ -26,7 +26,7 @@ async function loadComments() {
     comments.value = res.list;
     total.value = res.total;
   } catch (e) {
-    ElMessage.error("加载评论失败");
+    ElMessage.error(e instanceof Error ? e.message : "加载评论失败");
   } finally {
     loading.value = false;
   }

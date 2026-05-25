@@ -2,12 +2,12 @@ import request from "@/utils/request";
 import type { ApiResponse, PageResponse, IdResponse } from "@/types/api";
 import type { FollowUpRecord, FollowUpCreateRequest } from "@/types/followup";
 
-export async function fetchFollowUps(customerId: string | number): Promise<PageResponse<FollowUpRecord>> {
+export async function fetchFollowUps(customerId: string | number, page = 1, pageSize = 20): Promise<PageResponse<FollowUpRecord>> {
   const response = await request.get<ApiResponse<PageResponse<FollowUpRecord>>>("/follow-ups", {
     params: {
       customerId,
-      page: 1,
-      pageSize: 20
+      page,
+      pageSize
     }
   });
   return response.data.data;

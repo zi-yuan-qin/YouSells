@@ -6,19 +6,22 @@ import EmptyState from "@/components/ui/EmptyState.vue";
 import TaskBoardToolbar from "@/components/task/TaskBoardToolbar.vue";
 import TaskBoardColumn from "@/components/task/TaskBoardColumn.vue";
 import TaskEditDialog from "@/components/task/TaskEditDialog.vue";
-import { fetchTaskBoard, updateTask } from "@/api/task";
+import { fetchTaskBoard, updateTaskStatus } from "@/api/task";
 import type { TaskBoardColumn as TaskBoardColumnType, TaskBoardItem } from "@/types/task";
 
 const loading = ref(false);
+const loadError = ref(false);
 const columns = ref<TaskBoardColumnType[]>([]);
 const dialogVisible = ref(false);
 const editingTask = ref<TaskBoardItem | null>(null);
 
 async function loadBoard() {
+  loadError.value = false;
   loading.value = true;
   try {
     columns.value = await fetchTaskBoard();
   } catch (error) {
+    loadError.value = true;
     ElMessage.error(error instanceof Error ? error.message : "公共安排看板加载失败");
   } finally {
     loading.value = false;
@@ -46,13 +49,7 @@ async function onTaskSaved() {
 
 async function handleStatusChange(task: TaskBoardItem, newStatus: string) {
   try {
-    await updateTask(task.id, {
-      taskTitle: task.taskTitle,
-      status: newStatus,
-      priority: task.priority,
-      ownerUserId: task.ownerUserId,
-      dueAt: task.dueAt
-    });
+    await updateTaskStatus(task.id, { status: newStatus });
     ElMessage.success("状态已更新");
     await loadBoard();
   } catch (e) {
@@ -88,7 +85,8 @@ onMounted(() => {
         />
       </div>
 
-      <EmptyState v-if="!loading && columns.length === 0" title="暂无任务" description="看板空空如也，点击上方按钮创建第一个任务" />
+      <EmptyState v-if="!loading && loadError" title="加载失败" description="看板数据加载失败，请刷新重试" />
+      <EmptyState v-else-if="!loading && columns.length === 0" title="暂无任务" description="看板空空如也，点击上方按钮创建第一个任务" />
     </PageSection>
 
     <TaskEditDialog

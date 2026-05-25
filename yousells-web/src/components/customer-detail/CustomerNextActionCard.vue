@@ -6,10 +6,6 @@ defineProps<{
   followUps: FollowUpRecord[];
   loading: boolean;
 }>();
-
-const emit = defineEmits<{
-  updated: [];
-}>();
 </script>
 
 <template>

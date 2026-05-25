@@ -226,7 +226,6 @@ function handleResize() {
 
 function handleStatClick(label: string) {
   const queryMap: Record<string, Record<string, string>> = {
-    "客户总数": {},
     "高意向客户": { intent: "很稳" },
     "本月成交": { progress: "成交" }
   };
@@ -236,16 +235,27 @@ function handleStatClick(label: string) {
   });
 }
 
+let themeObserver: MutationObserver | null = null;
+
 onMounted(() => {
   void loadOverview();
   void userStore.loadUsers();
   window.addEventListener("resize", handleResize);
+  themeObserver = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.attributeName === "data-theme" && overview.value) {
+        void updateCharts();
+      }
+    }
+  });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
   trendChartInstance?.dispose();
   pieChartInstance?.dispose();
+  themeObserver?.disconnect();
 });
 </script>
 
@@ -325,7 +335,10 @@ onUnmounted(() => {
           </div>
           <DashboardCustomerList :customers="overview.focusCustomers" :loading />
         </div>
-        <div class="todo-card" :class="{ 'todo-card--warning': (overview.silentCustomers?.length ?? 0) > 5, 'todo-card--danger': (overview.silentCustomers?.length ?? 0) > 10 }">
+        <div class="todo-card" :class="{
+          'todo-card--warning': ((overview.silentCustomers?.length ?? 0) > 5 && (overview.silentCustomers?.length ?? 0) <= 10),
+          'todo-card--danger': (overview.silentCustomers?.length ?? 0) > 10
+        }">
           <div class="todo-card__header">
             <div class="todo-card__header-title">
               <el-icon><Warning /></el-icon>

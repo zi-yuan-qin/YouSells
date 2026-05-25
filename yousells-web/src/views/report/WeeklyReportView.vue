@@ -38,10 +38,10 @@ async function loadThisWeekReport() {
   }
 }
 
-async function loadHistory(p = 1) {
+async function loadHistory(p = 1, ps = 20) {
   historyLoading.value = true;
   try {
-    const data = await fetchWeeklyReportHistory(p, 20);
+    const data = await fetchWeeklyReportHistory(p, ps);
     history.value = data.list;
     historyTotal.value = data.total;
     historyPage.value = p;

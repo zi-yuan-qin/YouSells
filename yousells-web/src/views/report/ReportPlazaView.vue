@@ -17,6 +17,7 @@ const pageSize = ref(5);
 const total = ref(0);
 const filterUserId = ref<number | null>(null);
 const userList = ref<UserListItem[]>([]);
+let skipFilterWatch = false;
 
 async function loadUserList() {
   try {
@@ -46,11 +47,14 @@ async function loadData() {
 
 watch(activeTab, () => {
   page.value = 1;
+  skipFilterWatch = true;
   filterUserId.value = null;
+  skipFilterWatch = false;
   loadData();
 });
 
 watch(filterUserId, () => {
+  if (skipFilterWatch) return;
   page.value = 1;
   loadData();
 });

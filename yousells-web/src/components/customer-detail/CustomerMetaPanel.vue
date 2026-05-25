@@ -5,10 +5,6 @@ defineProps<{
   detail: CustomerDetail;
   loading: boolean;
 }>();
-
-const emit = defineEmits<{
-  "tags-updated": [];
-}>();
 </script>
 
 <template>

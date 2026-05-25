@@ -26,8 +26,8 @@ const editingScript = ref<ScriptItem | null>(null);
 async function loadCategories() {
   try {
     categories.value = await fetchScriptCategories();
-  } catch {
-    // silent
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : "话术分类加载失败");
   }
 }
 
@@ -127,7 +127,7 @@ onMounted(() => {
     <ScriptPreviewDrawer
       :visible="drawerVisible"
       :script="previewScript"
-      :loading="loading"
+      :loading="false"
       @close="onDrawerClose"
       @edit="(s) => { onDrawerClose(); openEdit(s); }"
     />
