@@ -1,101 +1,65 @@
 package com.yousells.modules.report.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @TableName("weekly_reports")
 public class WeeklyReportEntity {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @TableField("week_key")
     private String weekKey;
+
+    @TableField("user_id")
     private Long userId;
+
+    @TableField("summary")
     private String summary;
+
+    @TableField("issues")
     private String issues;
+
+    @TableField("next_week_plan")
     private String nextWeekPlan;
+
+    @TableField("week_start")
     private LocalDate weekStart;
+
+    @TableField("week_end")
     private LocalDate weekEnd;
+
+    @TableField("new_customer_count")
     private Integer newCustomerCount;
+
+    @TableField("follow_up_count")
     private Integer followUpCount;
+
+    @TableField("progress_advance_count")
     private Integer progressAdvanceCount;
+
+    @TableField("converted_count")
     private Integer convertedCount;
+
+    @TableField("task_completed_count")
     private Integer taskCompletedCount;
+
+    @TableField("progress_details")
     private String progressDetails;
+
+    @TableField("converted_details")
     private String convertedDetails;
+
+    @TableField("task_completed_details")
     private String taskCompletedDetails;
 
-    @TableField(exist = false)
-    private LocalDateTime createdAt;
-    @TableField(exist = false)
-    private LocalDateTime updatedAt;
-    @TableField(exist = false)
-    private Long createdBy;
-    @TableField(exist = false)
-    private Long updatedBy;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getWeekKey() { return weekKey; }
-    public void setWeekKey(String weekKey) { this.weekKey = weekKey; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-
-    public String getSummary() { return summary; }
-    public void setSummary(String summary) { this.summary = summary; }
-
-    public String getIssues() { return issues; }
-    public void setIssues(String issues) { this.issues = issues; }
-
-    public String getNextWeekPlan() { return nextWeekPlan; }
-    public void setNextWeekPlan(String nextWeekPlan) { this.nextWeekPlan = nextWeekPlan; }
-
-    public LocalDate getWeekStart() { return weekStart; }
-    public void setWeekStart(LocalDate weekStart) { this.weekStart = weekStart; }
-
-    public LocalDate getWeekEnd() { return weekEnd; }
-    public void setWeekEnd(LocalDate weekEnd) { this.weekEnd = weekEnd; }
-
-    public Integer getNewCustomerCount() { return newCustomerCount; }
-    public void setNewCustomerCount(Integer newCustomerCount) { this.newCustomerCount = newCustomerCount; }
-
-    public Integer getFollowUpCount() { return followUpCount; }
-    public void setFollowUpCount(Integer followUpCount) { this.followUpCount = followUpCount; }
-
-    public Integer getProgressAdvanceCount() { return progressAdvanceCount; }
-    public void setProgressAdvanceCount(Integer progressAdvanceCount) { this.progressAdvanceCount = progressAdvanceCount; }
-
-    public Integer getConvertedCount() { return convertedCount; }
-    public void setConvertedCount(Integer convertedCount) { this.convertedCount = convertedCount; }
-
-    public Integer getTaskCompletedCount() { return taskCompletedCount; }
-    public void setTaskCompletedCount(Integer taskCompletedCount) { this.taskCompletedCount = taskCompletedCount; }
-
-    public String getProgressDetails() { return progressDetails; }
-    public void setProgressDetails(String progressDetails) { this.progressDetails = progressDetails; }
-
-    public String getConvertedDetails() { return convertedDetails; }
-    public void setConvertedDetails(String convertedDetails) { this.convertedDetails = convertedDetails; }
-
-    public String getTaskCompletedDetails() { return taskCompletedDetails; }
-    public void setTaskCompletedDetails(String taskCompletedDetails) { this.taskCompletedDetails = taskCompletedDetails; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-    public Long getCreatedBy() { return createdBy; }
-    public void setCreatedBy(Long createdBy) { this.createdBy = createdBy; }
-
-    public Long getUpdatedBy() { return updatedBy; }
-    public void setUpdatedBy(Long updatedBy) { this.updatedBy = updatedBy; }
+    @TableLogic
+    @TableField(value = "is_deleted", fill = FieldFill.INSERT)
+    private Integer isDeleted;
 }
