@@ -24,6 +24,9 @@ app:
     secret: VGhpc0lzQVRlc3RTZWNyZXRLZXlGb3JZb3VTZWxsc0pXVEF1dGg0NTY3ODkwMTIzNA==
     access-token-expire-seconds: 43200
     issuer: yousells-server
+  ai:
+    mock:
+      enabled: true
 
 logging:
   level:

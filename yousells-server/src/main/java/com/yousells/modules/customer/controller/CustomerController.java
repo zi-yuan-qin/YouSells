@@ -5,6 +5,7 @@ import com.yousells.common.response.ApiResponse;
 import com.yousells.common.response.IdResponse;
 import com.yousells.common.response.PageResponse;
 import com.yousells.common.security.SecurityUserContext;
+import com.yousells.modules.customer.dto.AiInsightResponse;
 import com.yousells.modules.customer.dto.CustomerCreateRequest;
 import com.yousells.modules.customer.dto.CustomerImportDto;
 import com.yousells.modules.customer.dto.CustomerQueryRequest;
@@ -54,6 +55,16 @@ public class CustomerController {
     @GetMapping("/{id}")
     public ApiResponse<CustomerDetailVo> detail(@PathVariable Long id) {
         return ApiResponse.success(customerService.getCustomerDetail(id));
+    }
+
+    @GetMapping("/{id}/ai-insight")
+    public ApiResponse<AiInsightResponse> getAiInsight(@PathVariable Long id) {
+        return ApiResponse.success(customerService.getAiInsight(id));
+    }
+
+    @PostMapping("/{id}/ai-insight/refresh")
+    public ApiResponse<AiInsightResponse> refreshAiInsight(@PathVariable Long id) {
+        return ApiResponse.success(customerService.refreshAiInsight(id));
     }
 
     @PostMapping
