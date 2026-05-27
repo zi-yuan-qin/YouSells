@@ -38,6 +38,25 @@ app:
     secret: ${JWT_SECRET}
     access-token-expire-seconds: ${JWT_ACCESS_TOKEN_EXPIRE_SECONDS:43200}
     issuer: ${JWT_ISSUER:yousells-server}
+  ai:
+    llm:
+      endpoint: ${AI_LLM_ENDPOINT:https://api.openai.com}
+      api-key: ${AI_LLM_API_KEY:}
+      model: ${AI_LLM_MODEL:gpt-4o}
+      temperature: ${AI_LLM_TEMPERATURE:0.3}
+      max-retries: ${AI_LLM_MAX_RETRIES:2}
+      timeout-seconds: ${AI_LLM_TIMEOUT_SECONDS:60}
+    embedding:
+      endpoint: ${AI_EMBEDDING_ENDPOINT:https://api.openai.com}
+      api-key: ${AI_EMBEDDING_API_KEY:}
+      model: ${AI_EMBEDDING_MODEL:text-embedding-3-small}
+    qdrant:
+      host: ${QDRANT_HOST:localhost}
+      port: ${QDRANT_PORT:6334}
+      api-key: ${QDRANT_API_KEY:}
+      collection-scripts: ${QDRANT_COLLECTION_SCRIPTS:yousells_scripts}
+    mock:
+      enabled: ${AI_MOCK_ENABLED:false}
 
 logging:
   level:

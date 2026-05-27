@@ -24,6 +24,25 @@ app:
     allowed-origins: ${WEB_ORIGINS}
   jwt:
     secret: ${JWT_SECRET}
+  ai:
+    llm:
+      endpoint: ${AI_LLM_ENDPOINT}
+      api-key: ${AI_LLM_API_KEY}
+      model: ${AI_LLM_MODEL:gpt-4o}
+      temperature: ${AI_LLM_TEMPERATURE:0.3}
+      max-retries: ${AI_LLM_MAX_RETRIES:2}
+      timeout-seconds: ${AI_LLM_TIMEOUT_SECONDS:60}
+    embedding:
+      endpoint: ${AI_EMBEDDING_ENDPOINT}
+      api-key: ${AI_EMBEDDING_API_KEY}
+      model: ${AI_EMBEDDING_MODEL:text-embedding-3-small}
+    qdrant:
+      host: ${QDRANT_HOST}
+      port: ${QDRANT_PORT:6334}
+      api-key: ${QDRANT_API_KEY}
+      collection-scripts: ${QDRANT_COLLECTION_SCRIPTS:yousells_scripts}
+    mock:
+      enabled: false
 
 logging:
   level:
