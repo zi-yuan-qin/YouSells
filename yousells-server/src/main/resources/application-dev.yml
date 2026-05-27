@@ -9,3 +9,22 @@ app:
     secret: VGhpc0lzQURldlNlY3JldEtleUZvcllvdVNlbGxzSldUQXV0aDEyMzQ1Njc4OTA=
     access-token-expire-seconds: 43200
     issuer: yousells-server
+  ai:
+    llm:
+      endpoint: https://api.openai.com
+      api-key: ""
+      model: gpt-4o
+      temperature: 0.3
+      max-retries: 1
+      timeout-seconds: 30
+    embedding:
+      endpoint: https://api.openai.com
+      api-key: ""
+      model: text-embedding-3-small
+    qdrant:
+      host: localhost
+      port: 6334
+      api-key: ""
+      collection-scripts: yousells_scripts
+    mock:
+      enabled: true
