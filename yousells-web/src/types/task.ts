@@ -1,6 +1,7 @@
 export interface TaskBoardItem {
   id: number;
   taskTitle: string;
+  taskDescription?: string | null;
   direction: string;
   status: string;
   priority: string;

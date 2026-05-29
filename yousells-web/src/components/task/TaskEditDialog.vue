@@ -61,7 +61,7 @@ watch(
         form.ownerUserId = t.ownerUserId ?? 1;
         form.dueAt = t.dueAt;
         form.status = t.status;
-        form.taskDescription = null;
+        form.taskDescription = t.taskDescription ?? null;
       } else {
         isEdit.value = false;
         form.taskTitle = "";
@@ -77,7 +77,7 @@ watch(
 );
 
 async function submit() {
-  const valid = await formRef.value?.validate().catch(() => false);
+  const valid = !formRef.value ? false : await formRef.value.validate().catch(() => false);
   if (!valid) return;
 
   submitting.value = true;

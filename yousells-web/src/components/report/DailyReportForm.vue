@@ -42,7 +42,7 @@ const rules = {
 };
 
 async function submit() {
-  const valid = await formRef.value?.validate().catch(() => false);
+  const valid = !formRef.value ? false : await formRef.value.validate().catch(() => false);
   if (!valid) return;
 
   submitting.value = true;

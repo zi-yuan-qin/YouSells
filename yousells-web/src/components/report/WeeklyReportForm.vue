@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 import { ElMessage } from "element-plus";
-import type { WeeklyReportCreateRequest } from "@/types/report";
-import { createWeeklyReport } from "@/api/report";
+import type { WeeklyReport, WeeklyReportCreateRequest } from "@/types/report";
+import { createWeeklyReport, updateWeeklyReport } from "@/api/report";
 
 const props = defineProps<{
   weekKey?: string;
+  editReport?: WeeklyReport | null;
 }>();
 
 const emit = defineEmits<{
   submitted: [];
+  updated: [];
+  cancel: [];
 }>();
 
 const submitting = ref(false);
 const formRef = ref();
+const isEditing = ref(false);
 
 const form = reactive<WeeklyReportCreateRequest>({
   weekKey: props.weekKey || currentWeekKey(),
@@ -22,6 +26,16 @@ const form = reactive<WeeklyReportCreateRequest>({
   nextWeekPlan: ""
 });
 
+watch(() => props.editReport, (report) => {
+  if (report) {
+    isEditing.value = true;
+    form.weekKey = report.weekKey;
+    form.summary = report.summary;
+    form.issues = report.issues;
+    form.nextWeekPlan = report.nextWeekPlan;
+  }
+}, { immediate: true });
+
 const rules = {
   weekKey: [{ required: true, message: "请填写周标识", trigger: "blur" }],
   summary: [{ required: true, message: "请填写本周工作总结", trigger: "blur" }],
@@ -29,28 +43,44 @@ const rules = {
 };
 
 async function submit() {
-  const valid = await formRef.value?.validate().catch(() => false);
+  const valid = !formRef.value ? false : await formRef.value.validate().catch(() => false);
   if (!valid) return;
 
   submitting.value = true;
   try {
-    await createWeeklyReport({
-      weekKey: form.weekKey,
-      summary: form.summary,
-      issues: form.issues || null,
-      nextWeekPlan: form.nextWeekPlan
-    });
-    form.weekKey = "";
-    form.summary = "";
-    form.issues = null;
-    form.nextWeekPlan = "";
-    emit("submitted");
-    ElMessage.success("周报已提交");
+    if (isEditing.value && props.editReport) {
+      await updateWeeklyReport(props.editReport.id, {
+        weekKey: form.weekKey,
+        summary: form.summary,
+        issues: form.issues || null,
+        nextWeekPlan: form.nextWeekPlan
+      });
+      ElMessage.success("周报已更新");
+      emit("updated");
+    } else {
+      await createWeeklyReport({
+        weekKey: form.weekKey,
+        summary: form.summary,
+        issues: form.issues || null,
+        nextWeekPlan: form.nextWeekPlan
+      });
+      form.weekKey = "";
+      form.summary = "";
+      form.issues = null;
+      form.nextWeekPlan = "";
+      emit("submitted");
+      ElMessage.success("周报已提交");
+    }
   } catch (e) {
-    ElMessage.error(e instanceof Error ? e.message : "提交失败");
+    ElMessage.error(e instanceof Error ? e.message : (isEditing.value ? "更新失败" : "提交失败"));
   } finally {
     submitting.value = false;
   }
+}
+
+function handleCancel() {
+  isEditing.value = false;
+  emit("cancel");
 }
 
 function currentWeekKey(): string {
@@ -65,7 +95,7 @@ function currentWeekKey(): string {
 
 <template>
   <div class="report-form-card">
-    <h3 class="report-form-card__title">提交周报</h3>
+    <h3 class="report-form-card__title">{{ isEditing ? '编辑周报' : '提交周报' }}</h3>
     <el-form
       ref="formRef"
       :model="form"
@@ -112,8 +142,9 @@ function currentWeekKey(): string {
         :loading="submitting"
         @click="submit"
       >
-        提交周报
+        {{ isEditing ? '保存修改' : '提交周报' }}
       </el-button>
+      <el-button v-if="isEditing" @click="handleCancel">取消</el-button>
     </el-form>
   </div>
 </template>
