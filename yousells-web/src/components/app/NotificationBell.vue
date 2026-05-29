@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Bell } from '@element-plus/icons-vue'
-import { getNotifications, getUnreadCount, markRead, markAllRead } from '@/api/notification'
+import { formatDate } from '@/utils/format'
+import { getNotifications, getUnreadCount, markRead, markAllRead, deleteNotification } from '@/api/notification'
 import type { NotificationItem } from '@/types/notification'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
@@ -68,6 +69,25 @@ async function handleMarkRead(item: NotificationItem, event: Event) {
   await markRead(item.id)
   item.isRead = 1
   unreadCount.value = Math.max(0, unreadCount.value - 1)
+}
+
+async function handleDelete(item: NotificationItem, event: Event) {
+  event.stopPropagation()
+  const wasUnread = item.isRead === 0
+  // 先移除 UI，API 失败再恢复
+  notifications.value = notifications.value.filter(n => n.id !== item.id)
+  if (wasUnread) {
+    unreadCount.value = Math.max(0, unreadCount.value - 1)
+  }
+  try {
+    await deleteNotification(item.id)
+  } catch {
+    // API 失败时恢复到原位置
+    notifications.value.unshift(item)
+    if (wasUnread) {
+      unreadCount.value++
+    }
+  }
 }
 
 async function handleMarkAllRead() {
@@ -149,19 +169,29 @@ onUnmounted(() => {
           @click="handleClickItem(item)"
         >
           <div class="notification-content">
-            <div class="notification-title">{{ item.title }}</div>
+            <div class="notification-title" :class="{ 'unread-title': item.isRead === 0 }">{{ item.title }}</div>
             <div class="notification-body">{{ item.content }}</div>
-            <div class="notification-time">{{ item.createdAt }}</div>
+            <div class="notification-time">{{ formatDate(item.createdAt) }}</div>
           </div>
-          <el-button
-            v-if="item.isRead === 0"
-            link
-            type="primary"
-            size="small"
-            @click="handleMarkRead(item, $event)"
-          >
-            标为已读
-          </el-button>
+          <div class="notification-actions">
+            <el-button
+              v-if="item.isRead === 0"
+              link
+              type="primary"
+              size="small"
+              @click="handleMarkRead(item, $event)"
+            >
+              标为已读
+            </el-button>
+            <el-button
+              link
+              type="danger"
+              size="small"
+              @click="handleDelete(item, $event)"
+            >
+              删除
+            </el-button>
+          </div>
         </div>
       </div>
 
@@ -241,6 +271,9 @@ onUnmounted(() => {
   color: var(--color-text-primary);
   margin-bottom: 4px;
 }
+.notification-title.unread-title {
+  font-weight: 600;
+}
 .notification-body {
   font-size: 12px;
   color: var(--color-text-secondary);
@@ -253,6 +286,12 @@ onUnmounted(() => {
 .notification-time {
   font-size: 11px;
   color: var(--color-text-muted);
+}
+.notification-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
 }
 .notification-footer {
   text-align: center;

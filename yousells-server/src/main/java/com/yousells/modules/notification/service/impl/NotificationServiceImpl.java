@@ -72,6 +72,42 @@ public class NotificationServiceImpl implements NotificationService {
         notificationMapper.markAllRead(userId);
     }
 
+    @Override
+    public void deleteNotification(Long userId, Long notificationId) {
+        notificationMapper.softDelete(notificationId, userId);
+    }
+
+    @Override
+    public Page<NotificationVo> pageTrashNotifications(Long userId, int page, int pageSize) {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 20;
+        int offset = (page - 1) * pageSize;
+        List<NotificationEntity> records = notificationMapper.pageTrash(userId, offset, pageSize);
+        int total = notificationMapper.countTrash(userId);
+
+        List<NotificationVo> list = records.stream()
+                .map(this::toVo)
+                .toList();
+        Page<NotificationVo> voPage = new Page<>(page, pageSize, total);
+        voPage.setRecords(list);
+        return voPage;
+    }
+
+    @Override
+    public void restoreNotification(Long userId, Long notificationId) {
+        notificationMapper.restore(notificationId, userId);
+    }
+
+    @Override
+    public void permanentDelete(Long userId, Long notificationId) {
+        notificationMapper.permanentDelete(notificationId, userId);
+    }
+
+    @Override
+    public void permanentDeleteAll(Long userId) {
+        notificationMapper.permanentDeleteAll(userId);
+    }
+
     private NotificationVo toVo(NotificationEntity entity) {
         NotificationVo vo = new NotificationVo();
         vo.setId(entity.getId());
@@ -81,6 +117,8 @@ public class NotificationServiceImpl implements NotificationService {
         vo.setBusinessType(entity.getBusinessType());
         vo.setBusinessId(entity.getBusinessId());
         vo.setIsRead(entity.getIsRead());
+        vo.setIsDeleted(entity.getIsDeleted());
+        vo.setUpdatedAt(entity.getUpdatedAt());
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;
     }

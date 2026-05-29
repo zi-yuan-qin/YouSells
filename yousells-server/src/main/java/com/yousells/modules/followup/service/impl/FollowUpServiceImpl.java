@@ -11,6 +11,7 @@ import com.yousells.common.security.SecurityUserContext;
 import com.yousells.modules.auth.mapper.UserMapper;
 import com.yousells.modules.customer.entity.CustomerEntity;
 import com.yousells.modules.customer.mapper.CustomerMapper;
+import com.yousells.modules.customer.service.ChurnRiskService;
 import com.yousells.modules.followup.convert.FollowUpConvert;
 import com.yousells.modules.followup.dto.FollowUpCreateRequest;
 import com.yousells.modules.followup.dto.FollowUpQueryRequest;
@@ -31,11 +32,13 @@ public class FollowUpServiceImpl implements FollowUpService {
     private final FollowUpMapper followUpMapper;
     private final CustomerMapper customerMapper;
     private final UserMapper userMapper;
+    private final ChurnRiskService churnRiskService;
 
-    public FollowUpServiceImpl(FollowUpMapper followUpMapper, CustomerMapper customerMapper, UserMapper userMapper) {
+    public FollowUpServiceImpl(FollowUpMapper followUpMapper, CustomerMapper customerMapper, UserMapper userMapper, ChurnRiskService churnRiskService) {
         this.followUpMapper = followUpMapper;
         this.customerMapper = customerMapper;
         this.userMapper = userMapper;
+        this.churnRiskService = churnRiskService;
     }
 
     @Override
@@ -78,6 +81,9 @@ public class FollowUpServiceImpl implements FollowUpService {
 
         FollowUpEntity entity = FollowUpConvert.toEntity(request, userId);
         followUpMapper.insert(entity);
+
+        // 实时更新客户流失风险评估
+        churnRiskService.evaluateCustomer(request.customerId());
 
         return entity.getId();
     }

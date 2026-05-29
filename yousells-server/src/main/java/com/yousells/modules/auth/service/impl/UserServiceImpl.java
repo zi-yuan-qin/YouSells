@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
                 .map(e -> new UserListItemVo(
                         e.getId(),
                         e.getUsername(),
-                        e.getRealName(),
+                        e.getDisplayName(),
                         e.getLevel(),
                         e.getManagerUserId(),
                         e.getStatus()
@@ -75,6 +75,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCodeConstants.NOT_FOUND, "user not found");
         }
         entity.setRealName(request.realName());
+        entity.setDisplayName(request.realName());
         int rows = userMapper.updateById(entity);
         if (rows == 0) {
             throw new BusinessException(ErrorCodeConstants.INTERNAL_ERROR, "update failed");
@@ -111,6 +112,7 @@ public class UserServiceImpl implements UserService {
         entity.setUsername(request.username());
         entity.setPasswordHash(passwordEncoder.encode(request.password()));
         entity.setRealName(request.realName());
+        entity.setDisplayName(request.realName());
         entity.setLevel(request.level());
         entity.setManagerUserId(request.managerUserId());
         entity.setStatus("ACTIVE");
@@ -128,6 +130,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCodeConstants.NOT_FOUND, "user not found");
         }
         entity.setRealName(request.realName());
+        entity.setDisplayName(request.realName());
         entity.setLevel(request.level());
         entity.setManagerUserId(request.managerUserId());
         if (request.status() != null) {
@@ -173,7 +176,7 @@ public class UserServiceImpl implements UserService {
         return new UserProfileVo(
                 entity.getId(),
                 entity.getUsername(),
-                entity.getRealName(),
+                entity.getDisplayName(),
                 entity.getLevel(),
                 entity.getManagerUserId(),
                 entity.getStatus()

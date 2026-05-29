@@ -7,6 +7,7 @@ import com.yousells.common.security.SecurityUserContext;
 import com.yousells.modules.notification.service.NotificationService;
 import com.yousells.modules.notification.vo.NotificationVo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -53,6 +54,49 @@ public class NotificationController {
     public ApiResponse<Void> markAllRead() {
         Long userId = SecurityUserContext.requireCurrentUser().userId();
         notificationService.markAllRead(userId);
+        return ApiResponse.success();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteNotification(@PathVariable Long id) {
+        Long userId = SecurityUserContext.requireCurrentUser().userId();
+        notificationService.deleteNotification(userId, id);
+        return ApiResponse.success();
+    }
+
+    @GetMapping("/trash")
+    public ApiResponse<PageResponse<NotificationVo>> pageTrash(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize) {
+        Long userId = SecurityUserContext.requireCurrentUser().userId();
+        Page<NotificationVo> result = notificationService.pageTrashNotifications(userId, page, pageSize);
+        PageResponse<NotificationVo> response = new PageResponse<>(
+                result.getRecords(),
+                (int) result.getCurrent(),
+                (int) result.getSize(),
+                (int) result.getTotal()
+        );
+        return ApiResponse.success(response);
+    }
+
+    @PutMapping("/{id}/restore")
+    public ApiResponse<Void> restoreNotification(@PathVariable Long id) {
+        Long userId = SecurityUserContext.requireCurrentUser().userId();
+        notificationService.restoreNotification(userId, id);
+        return ApiResponse.success();
+    }
+
+    @DeleteMapping("/{id}/permanent")
+    public ApiResponse<Void> permanentDelete(@PathVariable Long id) {
+        Long userId = SecurityUserContext.requireCurrentUser().userId();
+        notificationService.permanentDelete(userId, id);
+        return ApiResponse.success();
+    }
+
+    @DeleteMapping("/trash")
+    public ApiResponse<Void> permanentDeleteAll() {
+        Long userId = SecurityUserContext.requireCurrentUser().userId();
+        notificationService.permanentDeleteAll(userId);
         return ApiResponse.success();
     }
 }

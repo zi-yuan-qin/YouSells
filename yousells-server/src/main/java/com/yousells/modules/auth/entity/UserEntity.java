@@ -16,6 +16,8 @@ public class UserEntity extends BaseEntity {
 
     private String realName;
 
+    private String displayName;
+
     private String level;
 
     private Long managerUserId;

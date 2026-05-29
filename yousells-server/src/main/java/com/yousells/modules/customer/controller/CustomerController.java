@@ -11,7 +11,9 @@ import com.yousells.modules.customer.dto.CustomerQueryRequest;
 import com.yousells.modules.customer.dto.CustomerUpdateRequest;
 import com.yousells.modules.customer.listener.CustomerImportListener;
 import com.yousells.modules.customer.mapper.CustomerMapper;
+import com.yousells.modules.customer.service.ChurnRiskService;
 import com.yousells.modules.customer.service.CustomerService;
+import com.yousells.modules.customer.vo.ChurnEvaluateResponse;
 import com.yousells.modules.customer.vo.CustomerDetailVo;
 import com.yousells.modules.customer.vo.CustomerExportVo;
 import com.yousells.modules.customer.vo.CustomerListItemVo;
@@ -40,10 +42,12 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final CustomerMapper customerMapper;
+    private final ChurnRiskService churnRiskService;
 
-    public CustomerController(CustomerService customerService, CustomerMapper customerMapper) {
+    public CustomerController(CustomerService customerService, CustomerMapper customerMapper, ChurnRiskService churnRiskService) {
         this.customerService = customerService;
         this.customerMapper = customerMapper;
+        this.churnRiskService = churnRiskService;
     }
 
     @GetMapping
@@ -110,5 +114,10 @@ public class CustomerController {
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
 
         EasyExcel.write(response.getOutputStream(), CustomerImportDto.class).sheet("客户导入模板").doWrite(List.of());
+    }
+
+    @PostMapping("/churn/evaluate")
+    public ApiResponse<ChurnEvaluateResponse> evaluateChurn() {
+        return ApiResponse.success(churnRiskService.evaluateAll());
     }
 }

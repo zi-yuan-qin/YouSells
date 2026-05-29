@@ -9,8 +9,10 @@ import PageSection from "@/components/app/PageSection.vue";
 import DashboardStatCards from "@/components/dashboard/DashboardStatCards.vue";
 import DashboardTaskList from "@/components/dashboard/DashboardTaskList.vue";
 import DashboardCustomerList from "@/components/dashboard/DashboardCustomerList.vue";
-import { fetchDashboardOverview } from "@/api/dashboard";
+import { fetchDashboardOverview, fetchChurnRisks, triggerChurnEvaluate } from "@/api/dashboard";
 import type { DashboardOverview } from "@/types/dashboard";
+import type { ChurnRiskResponse } from "@/types/churn";
+import ChurnRiskCard from "@/components/dashboard/ChurnRiskCard.vue";
 import { isUnauthorizedError } from "@/utils/request-error";
 import {
   User,
@@ -20,8 +22,7 @@ import {
   TrendCharts,
   PieChart,
   Bell,
-  Calendar,
-  Warning
+  Calendar
 } from "@element-plus/icons-vue";
 
 const router = useRouter();
@@ -31,6 +32,9 @@ const userStore = useUserStore();
 const loading = ref(false);
 const error = ref(false);
 const overview = ref<DashboardOverview | null>(null);
+const churnLoading = ref(false);
+const churnEvaluating = ref(false);
+const churnRisks = ref<ChurnRiskResponse | null>(null);
 const chartLoading = ref(true);
 
 // Charts refs
@@ -105,6 +109,30 @@ async function loadOverview() {
     ElMessage.error(e instanceof Error ? e.message : "首页看板加载失败");
   } finally {
     loading.value = false;
+  }
+}
+
+async function loadChurnRisks() {
+  churnLoading.value = true;
+  try {
+    churnRisks.value = await fetchChurnRisks();
+  } catch {
+    // churn load failure should not crash the dashboard
+  } finally {
+    churnLoading.value = false;
+  }
+}
+
+async function handleEvaluate() {
+  churnEvaluating.value = true;
+  try {
+    await triggerChurnEvaluate();
+    await loadChurnRisks();
+    ElMessage.success("流失风险评估完成");
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : "评估失败");
+  } finally {
+    churnEvaluating.value = false;
   }
 }
 
@@ -239,6 +267,7 @@ let themeObserver: MutationObserver | null = null;
 
 onMounted(() => {
   void loadOverview();
+  void loadChurnRisks();
   void userStore.loadUsers();
   window.addEventListener("resize", handleResize);
   themeObserver = new MutationObserver((mutations) => {
@@ -335,20 +364,14 @@ onUnmounted(() => {
           </div>
           <DashboardCustomerList :customers="overview.focusCustomers" :loading />
         </div>
-        <div class="todo-card" :class="{
-          'todo-card--warning': ((overview.silentCustomers?.length ?? 0) > 5 && (overview.silentCustomers?.length ?? 0) <= 10),
-          'todo-card--danger': (overview.silentCustomers?.length ?? 0) > 10
-        }">
-          <div class="todo-card__header">
-            <div class="todo-card__header-title">
-              <el-icon><Warning /></el-icon>
-              <span>沉默客户</span>
-              <el-tag v-if="overview.silentCustomers?.length" :type="(overview.silentCustomers.length > 10) ? 'danger' : (overview.silentCustomers.length > 5) ? 'warning' : 'info'" size="small">
-                {{ overview.silentCustomers.length }} 位
-              </el-tag>
-            </div>
-          </div>
-          <DashboardCustomerList :customers="overview.silentCustomers" :loading />
+        <div class="todo-card">
+          <ChurnRiskCard
+            :risks="churnRisks"
+            :loading="churnLoading"
+            :evaluating="churnEvaluating"
+            @evaluate="handleEvaluate"
+            @view-customer="(customerId) => router.push({ name: RouteName.CustomerDetail, params: { id: customerId } })"
+          />
         </div>
       </div>
     </PageSection>

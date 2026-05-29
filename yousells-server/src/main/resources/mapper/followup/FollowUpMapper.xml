@@ -37,7 +37,7 @@
     </select>
 
     <select id="selectUserDisplayNames" resultType="com.yousells.modules.followup.mapper.FollowUpMapper$UserDisplayName">
-        SELECT id AS userId, real_name AS displayName
+        SELECT id AS userId, COALESCE(real_name, display_name) AS displayName
         FROM users
         WHERE id IN
         <foreach collection="userIds" item="id" open="(" close=")" separator=",">

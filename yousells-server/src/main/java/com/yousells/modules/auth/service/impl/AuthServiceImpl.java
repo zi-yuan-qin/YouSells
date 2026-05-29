@@ -50,7 +50,7 @@ public class AuthServiceImpl implements AuthService {
         LoginUser loginUser = new LoginUser(
                 user.getId(),
                 user.getUsername(),
-                user.getRealName(),
+                user.getDisplayName(),
                 user.getLevel(),
                 user.getManagerUserId()
         );

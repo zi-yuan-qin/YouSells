@@ -15,4 +15,14 @@ public interface NotificationService {
     void markRead(Long userId, Long notificationId);
 
     void markAllRead(Long userId);
+
+    void deleteNotification(Long userId, Long notificationId);
+
+    Page<NotificationVo> pageTrashNotifications(Long userId, int page, int pageSize);
+
+    void restoreNotification(Long userId, Long notificationId);
+
+    void permanentDelete(Long userId, Long notificationId);
+
+    void permanentDeleteAll(Long userId);
 }

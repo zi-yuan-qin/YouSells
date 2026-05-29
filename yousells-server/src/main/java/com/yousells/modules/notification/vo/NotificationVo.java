@@ -14,5 +14,7 @@ public class NotificationVo {
     private String businessType;
     private Long businessId;
     private Integer isRead;
+    private Integer isDeleted;
+    private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
 }
