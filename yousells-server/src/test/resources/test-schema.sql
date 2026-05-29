@@ -188,6 +188,18 @@ CREATE TABLE IF NOT EXISTS report_comments (
     is_deleted INT NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS ai_insight_cache (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    customer_id BIGINT NOT NULL,
+    insight_json TEXT NOT NULL,
+    generated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_insight_customer (customer_id)
+);
+
+DELETE FROM ai_insight_cache;
 DELETE FROM notifications;
 DELETE FROM operation_logs;
 DELETE FROM weekly_reports;

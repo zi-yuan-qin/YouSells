@@ -1,6 +1,7 @@
 package com.yousells.modules.customer.service;
 
 import com.yousells.common.response.PageResponse;
+import com.yousells.modules.customer.dto.AiInsightResponse;
 import com.yousells.modules.customer.dto.CustomerCreateRequest;
 
 import java.util.List;
@@ -20,4 +21,8 @@ public interface CustomerService {
     Long createCustomer(CustomerCreateRequest request);
 
     void updateCustomer(Long id, CustomerUpdateRequest request);
+
+    AiInsightResponse getAiInsight(Long id);
+
+    AiInsightResponse refreshAiInsight(Long id);
 }

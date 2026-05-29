@@ -9,7 +9,9 @@ import com.yousells.common.security.DataScopeHelper;
 import com.yousells.common.security.LoginUser;
 import com.yousells.common.security.SecurityUserContext;
 import com.yousells.modules.auth.mapper.UserMapper;
+import com.yousells.modules.customer.entity.AiInsightCache;
 import com.yousells.modules.customer.entity.CustomerEntity;
+import com.yousells.modules.customer.mapper.AiInsightCacheMapper;
 import com.yousells.modules.customer.mapper.CustomerMapper;
 import com.yousells.modules.followup.convert.FollowUpConvert;
 import com.yousells.modules.followup.dto.FollowUpCreateRequest;
@@ -31,11 +33,14 @@ public class FollowUpServiceImpl implements FollowUpService {
     private final FollowUpMapper followUpMapper;
     private final CustomerMapper customerMapper;
     private final UserMapper userMapper;
+    private final AiInsightCacheMapper aiInsightCacheMapper;
 
-    public FollowUpServiceImpl(FollowUpMapper followUpMapper, CustomerMapper customerMapper, UserMapper userMapper) {
+    public FollowUpServiceImpl(FollowUpMapper followUpMapper, CustomerMapper customerMapper,
+                               UserMapper userMapper, AiInsightCacheMapper aiInsightCacheMapper) {
         this.followUpMapper = followUpMapper;
         this.customerMapper = customerMapper;
         this.userMapper = userMapper;
+        this.aiInsightCacheMapper = aiInsightCacheMapper;
     }
 
     @Override
@@ -78,6 +83,12 @@ public class FollowUpServiceImpl implements FollowUpService {
 
         FollowUpEntity entity = FollowUpConvert.toEntity(request, userId);
         followUpMapper.insert(entity);
+
+        AiInsightCache cache = aiInsightCacheMapper.selectValidByCustomerId(request.customerId());
+        if (cache != null) {
+            cache.setExpiresAt(java.time.LocalDateTime.now());
+            aiInsightCacheMapper.updateById(cache);
+        }
 
         return entity.getId();
     }

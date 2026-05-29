@@ -10,9 +10,11 @@ import CustomerMetaPanel from "@/components/customer-detail/CustomerMetaPanel.vu
 import CustomerNextActionCard from "@/components/customer-detail/CustomerNextActionCard.vue";
 import FollowUpTimeline from "@/components/followup/FollowUpTimeline.vue";
 import FollowUpCreateForm from "@/components/followup/FollowUpCreateForm.vue";
-import { fetchCustomerDetail } from "@/api/customer-detail";
+import AiInsightPanel from "@/components/insight/AiInsightPanel.vue";
+import { fetchCustomerDetail, fetchCustomerAiInsight, refreshCustomerAiInsight } from "@/api/customer-detail";
 import { fetchFollowUps } from "@/api/followup";
 import type { CustomerDetail } from "@/types/customer-detail";
+import type { AiInsight } from "@/types/ai-insight";
 import type { FollowUpRecord } from "@/types/followup";
 import { RouteName } from "@/router/route-names";
 
@@ -32,6 +34,40 @@ const followUpTotal = ref(0);
 const followUpPage = ref(1);
 const followUpPageSize = 20;
 let requestId = 0;
+
+const aiInsight = ref<AiInsight | null>(null);
+const aiInsightLoading = ref(false);
+const aiInsightError = ref(false);
+
+async function loadAiInsight() {
+  const id = String(route.params.id);
+  if (!id || id === "undefined") return;
+  aiInsightLoading.value = true;
+  aiInsightError.value = false;
+  try {
+    const result = await fetchCustomerAiInsight(id);
+    aiInsight.value = result;
+  } catch (e) {
+    aiInsightError.value = true;
+  } finally {
+    aiInsightLoading.value = false;
+  }
+}
+
+async function onRefreshInsight() {
+  const id = String(route.params.id);
+  if (!id || id === "undefined") return;
+  aiInsightLoading.value = true;
+  aiInsightError.value = false;
+  try {
+    const result = await refreshCustomerAiInsight(id);
+    aiInsight.value = result;
+  } catch (e) {
+    aiInsightError.value = true;
+  } finally {
+    aiInsightLoading.value = false;
+  }
+}
 
 async function loadData() {
   const id = String(route.params.id);
@@ -84,6 +120,7 @@ async function onFollowUpPageChange(page: number) {
 
 onMounted(() => {
   void loadData();
+  void loadAiInsight();
 });
 
 watch(() => route.params.id, (newId, oldId) => {
@@ -167,6 +204,15 @@ watch(() => route.params.id, (newId, oldId) => {
         title="客户不存在"
         description="该客户可能已被删除或 ID 有误"
       />
+
+      <div v-if="detail" style="margin-top: 20px">
+        <AiInsightPanel
+          :insight="aiInsight"
+          :loading="aiInsightLoading"
+          :error="aiInsightError"
+          @refresh="onRefreshInsight"
+        />
+      </div>
 
       <div v-if="detail">
         <div class="followup-section-header">
